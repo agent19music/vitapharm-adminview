@@ -9,11 +9,12 @@ export default function ProductProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm'
 
   // Fetch products
   useEffect(() => {
     setIsLoading(true);
-    fetch('http://server-env.eba-8hpawwgj.eu-north-1.elasticbeanstalk.com/api/vitapharm/products')
+    fetch(`${apiEndpoint}/products`)
       .then(response => response.json())
       .then(data => {
         setProducts(data);
