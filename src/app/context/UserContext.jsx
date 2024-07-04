@@ -2,18 +2,22 @@
  
 import { createContext, useState, useEffect } from 'react'
 import { useToast } from "@/components/ui/use-toast"
+import { useRouter } from 'next/navigation';
 
  
 export const UserContext = createContext({})
  
 export default function UserProvider({ children }) {
   const { toast } = useToast();
+  const router = useRouter();
     const [currentUser, setCurrentUser] = useState(null)
-    const [authToken, setAuthToken] = useState(() =>
-        sessionStorage.getItem('authToken')
-          ? sessionStorage.getItem('authToken')
-          : null
-      )
+    const [authToken, setAuthToken] = useState(() => {
+      if (typeof window !== 'undefined') {
+          return sessionStorage.getItem('authToken') ? sessionStorage.getItem('authToken') : null;
+      }
+      return null;
+  });
+  
       const [onchange, setOnchange] = useState(false)  
 
     const apiEndpoint = ' http://127.0.0.1:5000/api/vitapharm'
@@ -37,7 +41,7 @@ export default function UserProvider({ children }) {
               description: "You are now logged in.",
             });
             setOnchange(!onchange);
-            navigate('/products');
+            router.push('/products');
           } else {
             toast({
               title: "Login failed.",
@@ -56,13 +60,13 @@ export default function UserProvider({ children }) {
     setCurrentUser(null)
     setAuthToken(null)
     setOnchange(!onchange)
-    navigate('/login')
+    router.push('/')
   }
 
    // Get Authenticated user
    useEffect(() => {
     if (authToken) {
-      fetch(`${apiEndpoint}/authenticated_user`, {
+      fetch(`${apiEndpoint}/admin/authenticated_user`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -71,7 +75,7 @@ export default function UserProvider({ children }) {
       })
         .then((res) => res.json())
         .then((response) => {
-          if (response.email || response.username) {
+          if (response.email) {
             setCurrentUser(response)
           } else {
             setCurrentUser(null)

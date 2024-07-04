@@ -63,6 +63,7 @@ import {
 import { useState, useEffect } from "react";
 import SideNav from "../components/SideNav";
 import ProductList from "../components/Product/ProductList";
+import AdminPfp from "../components/AdminPfp";
 
 
 
@@ -192,31 +193,7 @@ export default function Dashboard() {
               onChange={(e) => searchItems(e.target.value)}
             />
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="overflow-hidden rounded-full"
-              >
-                <Image
-                  src="/logo.png"
-                  width={720}
-                  height={480}
-                  alt="Avatar"
-                  className="overflow-hidden rounded-full"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+         <AdminPfp/>
         </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="all">

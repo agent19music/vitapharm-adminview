@@ -74,13 +74,13 @@ export default function LogIn() {
       </div>
       <div className="hidden bg-muted lg:flex lg:items-center lg:justify-center">
       <Image
-  src="/logo.png"
-  alt="Logo"
-  width="288"
-  height="162"
-  className="object-contain"
-  priority
-/>
+      src="/logo.png"
+      alt="Logo"
+      width="288"
+      height="162"
+      className="object-contain"
+      priority
+    />
 
       </div>
     </div>
