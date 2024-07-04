@@ -10,10 +10,13 @@ export default function OrderProvider({ children }) {
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm'
+
+
      // Fetch orders
   useEffect(() => {
     setIsLoading(true);
-    fetch('http://server-env.eba-8hpawwgj.eu-north-1.elasticbeanstalk.com/api/vitapharm/orders')
+    fetch(`${apiEndpoint}/orders`)
       .then(response => response.json())
       .then(data => {
         setOrders(data);

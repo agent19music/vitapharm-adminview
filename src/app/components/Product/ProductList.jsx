@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Table,
   TableBody,
@@ -19,7 +19,20 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Skeleton } from '@/components/ui/skeleton'; // Assuming you have this component
+import { Skeleton } from '@/components/ui/skeleton'; 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { ProductContext } from '@/app/context/ProductContext';
+
 
 
 const ITEMS_PER_PAGE = 10;
@@ -50,6 +63,28 @@ export default function ProductList({ isLoading, filteredProducts }) {
   function handleNextPage() {
     setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
   }
+  const {apiEndpoint} = useContext(ProductContext)
+
+ 
+    const deleteProduct = async (productId) => {
+        try {
+            const response = await fetch(`${apiEndpoint}/products/${productId}`, {
+                method: 'DELETE',
+                // headers: {
+                //     'Authorization': `Bearer ${token}`
+                // }
+            });
+            if (!response.ok) {
+                throw new Error('Error deleting product');
+            }
+            const data = await response.json();
+            console.log('Product deleted successfully:', data);
+        } catch (error) {
+            console.error('Error deleting product:', error);
+        }
+    };
+
+
 
   return (
     <div>
@@ -157,11 +192,29 @@ export default function ProductList({ isLoading, filteredProducts }) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/editproduct`)}>Edit</DropdownMenuItem>
-                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/productoffer`)}>Put on Offer</DropdownMenuItem>
-                  </DropdownMenuContent>
+    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+    <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/editproduct`)}>Edit</DropdownMenuItem>
+    <DropdownMenuItem>
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button variant="outline">Delete</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete this product.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteProduct(sessionToken)}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    </DropdownMenuItem>
+    <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/productoffer`)}>Put on Offer</DropdownMenuItem>
+</DropdownMenuContent>
 
                       </DropdownMenu>
                     </TableCell>

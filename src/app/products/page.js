@@ -74,7 +74,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false)
   useEffect(() => {
     setIsLoading(true);
-    fetch('http://server-env.eba-8hpawwgj.eu-north-1.elasticbeanstalk.com/api/vitapharm/products')
+    fetch('http://127.0.0.1:5000/api/vitapharm/products')
       .then(response => response.json())
       .then(data => {
         setProducts(data);
