@@ -15,7 +15,7 @@ const withAuth = (WrappedComponent) => {
           router.replace('/');
         }
       }
-    }, []);
+    }, [router]);
 
     // If authToken exists, render the wrapped component
     return <WrappedComponent {...props} />;

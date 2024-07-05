@@ -13,6 +13,7 @@ import { OrderContext } from "../context/OrderContext";
 
 export default function OrderList() {
   const { orders } = useContext(OrderContext);
+  console.log(orders);
 
   // Function to format the date
   const formatDate = (dateString) => {
@@ -34,14 +35,18 @@ export default function OrderList() {
       <TableBody>
         {orders.map((order) => (
           <TableRow key={order.id}>
+            {(order.customerEmail == "" && order.customerFirstName == "")&&
             <TableCell>
+              -
+              </TableCell>}
+            {(order.customerFirstName !== "" && order.customerEmail !== "")&&<TableCell>
               <div className="font-medium">
                 {order.customerFirstName} {order.customerLastName}
               </div>
               <div className="hidden text-sm text-muted-foreground md:inline">
                 {order.customerEmail}
               </div>
-            </TableCell>
+            </TableCell>}
             <TableCell className="hidden sm:table-cell">
               {/* Replace with actual order type */}
               Order Type
@@ -54,7 +59,9 @@ export default function OrderList() {
             <TableCell className="hidden md:table-cell">
               {formatDate(order.transaction_date)}
             </TableCell>
-            <TableCell className="text-right">${order.discounted_total}</TableCell>
+            {(order.discounted_total == null) && <TableCell className="text-right">-</TableCell>}
+
+           {(order.discounted_total !==null) && <TableCell className="text-right">Ksh {order.discounted_total}</TableCell>}
           </TableRow>
         ))}
       </TableBody>
