@@ -16,9 +16,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <UserProvider> {/* Wrap your application with UserProvider */}
-        
+         <OrderProvider>
               {children}
-          
+              </OrderProvider>
         </UserProvider>
       </body>
     </html>
