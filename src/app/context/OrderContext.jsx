@@ -9,6 +9,7 @@ export default function OrderProvider({ children }) {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const { authToken } = useContext(UserContext);
 
   const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm';
@@ -58,6 +59,7 @@ const calculateEarningsFromPaidOrders = useCallback((orders) => {
       .then(data => {
         setOrders(data);
         setFilteredOrders(data);
+        setSelectedOrder(data[data.length - 1]);
         setIsLoading(false);
       })
       .catch(error => {
@@ -72,7 +74,9 @@ const calculateEarningsFromPaidOrders = useCallback((orders) => {
       filteredOrders,
       isLoading,
       filterOrders,
-      calculateEarningsFromPaidOrders
+      calculateEarningsFromPaidOrders,
+      selectedOrder,
+      setSelectedOrder
     }}>
       {children}
     </OrderContext.Provider>
