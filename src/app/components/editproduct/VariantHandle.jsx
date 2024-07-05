@@ -17,24 +17,25 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, XCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function VariantHandle({ product }) {
   console.log(product);
   const [variants, setVariants] = useState();
-  console.log(product.variations);
   useEffect(() => {
     setVariants(product.variations);
   }, [product.variations]);
   
-  console.log(variants);
-
   const addVariant = () => {
     setVariants([
       ...variants,
       { id: variants.length + 1, price: "", size: "" },
     ]);
+  };
+
+  const removeVariant = (indexToRemove) => {
+    setVariants(variants.filter((_, index) => index !== indexToRemove));
   };
 
   return (
@@ -52,6 +53,7 @@ export default function VariantHandle({ product }) {
               <TableHead className="w-[100px]">SKU</TableHead>
               <TableHead>Price</TableHead>
               <TableHead className="w-[100px]">Size</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -79,6 +81,12 @@ export default function VariantHandle({ product }) {
                     type="text"
                     defaultValue={variant.size}
                   />
+                </TableCell>
+                <TableCell>
+                  <Button onClick={() => removeVariant(index)}>
+                    <XCircle className="h-3.5 w-3.5" />
+                    <span className="sr-only">Remove</span>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
