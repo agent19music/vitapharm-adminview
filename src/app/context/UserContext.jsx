@@ -1,14 +1,13 @@
 'use client'
  
 import { createContext, useState, useEffect } from 'react'
-import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from 'next/navigation';
+import {toast} from 'react-hot-toast';
 
  
 export const UserContext = createContext({})
  
 export default function UserProvider({ children }) {
-  const { toast } = useToast();
   const router = useRouter();
     const [currentUser, setCurrentUser] = useState(null)
     const [authToken, setAuthToken] = useState(() => {
@@ -23,7 +22,7 @@ export default function UserProvider({ children }) {
     const apiEndpoint = ' http://127.0.0.1:5000/api/vitapharm'
 
     function login(email, password) {
-        fetch(`${apiEndpoint}/admin/login`, {
+      fetch(`${apiEndpoint}/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,21 +35,16 @@ export default function UserProvider({ children }) {
           if (response.access_token) {
             sessionStorage.setItem('authToken', response.access_token);
             setAuthToken(response.access_token);
-            toast({
-              title: "Login successful.",
-              description: "You are now logged in.",
-            });
+            toast.success("You are now logged in."); // Success toast
             setOnchange(!onchange);
             router.push('/products');
           } else {
-            toast({
-              title: "Login failed.",
-              description: "Incorrect username or password",
-            });
+            toast.error("Incorrect username or password"); // Error toast
           }
         })
         .catch((error) => {
           console.error('Error logging in:', error);
+          toast.error('Error logging in'); // Error toast
         });
     }
     

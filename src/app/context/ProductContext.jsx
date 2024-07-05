@@ -1,6 +1,7 @@
 'use client'
 
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
+import { UserContext } from './UserContext';
 
 // Create the context
 export const ProductContext = createContext({});
@@ -10,6 +11,7 @@ export default function ProductProvider({ children }) {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm'
+  const {authToken} =  useContext(UserContext)
 
   // Fetch products
   useEffect(() => {
@@ -43,6 +45,25 @@ export default function ProductProvider({ children }) {
     setFilteredProducts(filtered);
   }
 
+  const deleteProduct = async (productId) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/products/${productId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Error deleting product');
+        }
+        const data = await response.json();
+        console.log('Product deleted successfully:', data);
+    } catch (error) {
+        console.error('Error deleting product:', error);
+    }
+};
+
+
   return (
     <ProductContext.Provider value={{
       products,
@@ -51,7 +72,8 @@ export default function ProductProvider({ children }) {
       searchItems,
       setProducts,
       setFilteredProducts,
-      setIsLoading
+      setIsLoading,
+      deleteProduct
     }}>
       {children}
     </ProductContext.Provider>

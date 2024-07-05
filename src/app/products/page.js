@@ -64,6 +64,7 @@ import { useState, useEffect } from "react";
 import SideNav from "../components/SideNav";
 import ProductList from "../components/Product/ProductList";
 import AdminPfp from "../components/AdminPfp";
+import { toast, Toaster } from 'react-hot-toast';
 
 
 
@@ -87,6 +88,7 @@ export default function Dashboard() {
   
 
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const notify = () => toast('Here is your toast.');
  
   function searchItems(query) {
     let lowerCaseQuery = query.toLowerCase();
@@ -243,6 +245,10 @@ export default function Dashboard() {
                   </span>
                 </Button>
                 </Link>
+                <Button onClick={notify}>
+                  Oi lad
+                </Button>
+                <Toaster />
               </div>
             </div>
             <TabsContent value="all">

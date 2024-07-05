@@ -61,12 +61,14 @@ import SideNav from "@/app/components/SideNav";
 import PhotoCard from "@/app/components/editproduct/PhotoCard";
 import CategoryToggle from "@/app/components/editproduct/CategoryToggle";
 import VariantHandle from "@/app/components/editproduct/VariantHandle";
+import { useContext } from "react";
+import { UserContext } from "@/app/context/UserContext";
 import { useRouter } from "next/navigation";
 
 
 
 export default  function Editproduct({params}) {
-  console.log(params);
+  const {apiEndpoint} = useContext(UserContext)
   const router = useRouter();
   function stripInt(obj) {
     return parseInt(obj.editproduct, 10);
@@ -74,23 +76,22 @@ export default  function Editproduct({params}) {
   
   const [product, setProduct] = useState([])
   const [isLoading, setIsLoading] = useState(false);
+console.log(params.id);
+console.log(apiEndpoint);
 
 useEffect(() => {
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`http://server-env.eba-8hpawwgj.eu-north-1.elasticbeanstalk.com/api/vitapharm/products/${params.id}`);
-      const data = await response.json();
+  setIsLoading(true);
+  fetch(`${apiEndpoint}/products/${params.id}`)
+    .then(response => response.json())
+    .then(data => {
       setProduct(data);
       setIsLoading(false);
-    } catch (error) {
+    })
+    .catch(error => {
       console.error('Error:', error);
       setIsLoading(false);
-    }
-  };
-
-  fetchData();
-}, [params]);
+    });
+}, [params, apiEndpoint]);
 
 
   console.log(product);

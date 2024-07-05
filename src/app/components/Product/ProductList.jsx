@@ -66,24 +66,7 @@ export default function ProductList({ isLoading, filteredProducts }) {
   const {apiEndpoint} = useContext(ProductContext)
 
  
-    const deleteProduct = async (productId) => {
-        try {
-            const response = await fetch(`${apiEndpoint}/products/${productId}`, {
-                method: 'DELETE',
-                // headers: {
-                //     'Authorization': `Bearer ${token}`
-                // }
-            });
-            if (!response.ok) {
-                throw new Error('Error deleting product');
-            }
-            const data = await response.json();
-            console.log('Product deleted successfully:', data);
-        } catch (error) {
-            console.error('Error deleting product:', error);
-        }
-    };
-
+   
 
 
   return (
