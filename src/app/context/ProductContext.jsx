@@ -73,7 +73,8 @@ export default function ProductProvider({ children }) {
       setProducts,
       setFilteredProducts,
       setIsLoading,
-      deleteProduct
+      deleteProduct,
+      apiEndpoint
     }}>
       {children}
     </ProductContext.Provider>

@@ -28,7 +28,7 @@ export default function PhotoCard({product}) {
                 alt={`Product image ${index + 1}`}
                 className="aspect-square w-full rounded-md object-cover"
                 height="720"
-                src={image.url}
+                src={`data:image/jpeg;base64,${image.data}`}
                 width="480"
               />
             </button>

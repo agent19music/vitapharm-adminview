@@ -65,6 +65,17 @@ import SideNav from "../components/SideNav";
 import ProductList from "../components/Product/ProductList";
 import AdminPfp from "../components/AdminPfp";
 import { toast, Toaster } from 'react-hot-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 
 
@@ -249,6 +260,7 @@ export default function Dashboard() {
                   Oi lad
                 </Button>
                 <Toaster />
+               
               </div>
             </div>
             <TabsContent value="all">

@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect, useContext } from 'react';
 import {
   Table,
@@ -63,7 +64,7 @@ export default function ProductList({ isLoading, filteredProducts }) {
   function handleNextPage() {
     setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
   }
-  const {apiEndpoint} = useContext(ProductContext)
+  const {deleteProduct} = useContext(ProductContext)
 
  
    
@@ -167,39 +168,38 @@ export default function ProductList({ isLoading, filteredProducts }) {
                       {product.createdAt}
                     </TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-    <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/editproduct`)}>Edit</DropdownMenuItem>
-    <DropdownMenuItem>
-        <AlertDialog>
+                    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button aria-haspopup="true" size="icon" variant="ghost">
+          <MoreHorizontal className="h-4 w-4" />
+          <span className="sr-only">Toggle menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/editproduct`)}>Edit</DropdownMenuItem>
+        
+          <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button variant="outline">Delete</Button>
+              <Button >Delete</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete this product.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => deleteProduct(sessionToken)}>Delete</AlertDialogAction>
-                </AlertDialogFooter>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete this product.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={()=> deleteProduct(product.id)}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
             </AlertDialogContent>
-        </AlertDialog>
-    </DropdownMenuItem>
-    <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/productoffer`)}>Put on Offer</DropdownMenuItem>
-</DropdownMenuContent>
-
-                      </DropdownMenu>
+          </AlertDialog>
+     
+        <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/productoffer`)}>Put on Offer</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 );
