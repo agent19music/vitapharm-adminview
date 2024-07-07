@@ -1,21 +1,28 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import {
   Card,
   CardContent,
 } from "@/components/ui/card"
 import Image from "next/image"
-import { Upload } from "lucide-react"
+import { Upload, X } from "lucide-react"
+import { ProductContext } from '@/app/context/ProductContext';
 
 export default function PhotoCard({product}) {
-  const [selectedFile, setSelectedFile] = useState(null);
+const {selectedImages, setSelectedImages} = useContext(ProductContext)
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImages(oldImages => [...oldImages, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-    // TODO: Add your upload logic here
+  const removeSelectedImage = (index) => {
+    setSelectedImages(oldImages => oldImages.filter((_, i) => i !== index));
   };
 
   return (
@@ -33,10 +40,31 @@ export default function PhotoCard({product}) {
               />
             </button>
           ))}
-          <button className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed" onClick={handleUpload}>
+          <hr />
+          {selectedImages &&  selectedImages.map((image, index) => (
+            <div key={index} className="relative">
+             <button onClick={() => removeSelectedImage(index)} className="absolute top-0 right-0 p-1 bg-white text-red-500">
+  <X className="h-4 w-4" />
+</button>
+
+              <Image
+                alt={`Selected image ${index + 1}`}
+                className="aspect-square w-full rounded-md object-cover"
+                height="720"
+                src={image}
+                width="480"
+              />
+            </div>
+          ))}
+          <button className="relative flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
             <Upload className="h-4 w-4 text-muted-foreground" />
-            <span className="sr-only">Upload</span>
-            <input type="file" onChange={handleFileChange} style={{display: 'none'}} />
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileChange}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
           </button>
         </div>
       </CardContent>

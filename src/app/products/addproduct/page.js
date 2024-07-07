@@ -63,7 +63,6 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import SideNav from "@/app/components/SideNav";
-import { DatePickerWithRange } from "@/app/components/Productoffer/DateRange";
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
@@ -474,7 +473,6 @@ export default function AddProduct() {
           </Button>
         </form>
       </Form>
-      <DatePickerWithRange/>
     </main>
     </div>
   );
