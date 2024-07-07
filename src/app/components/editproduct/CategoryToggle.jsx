@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Card,
   CardContent,
@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { ProductContext } from "@/app/context/ProductContext";
 
 const categories = [
   "face",
@@ -62,8 +63,7 @@ const sub_categories = [
 ].sort();
 
 export default function CategoryToggle({ product }) {
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const{selectedCategory, selectedSubCategory, setSelectedCategory, setSelectedSubCategory} = useContext(ProductContext)
 
   useEffect(() => {
     if (product.category) {

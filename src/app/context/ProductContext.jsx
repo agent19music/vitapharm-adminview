@@ -12,6 +12,8 @@ export default function ProductProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm'
   const {authToken} =  useContext(UserContext)
@@ -90,7 +92,11 @@ const [date, setDate] = React.useState({
       setDate,
       date,
       selectedImages,
-      setSelectedImages
+      setSelectedImages,
+      selectedCategory,
+      selectedSubCategory,
+      setSelectedSubCategory,
+      setSelectedCategory
     }}>
       {children}
     </ProductContext.Provider>
