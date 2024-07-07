@@ -3,7 +3,7 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { UserContext } from './UserContext';
 import * as React from "react"
-
+import { toast } from 'react-hot-toast';
 
 // Create the context
 export const ProductContext = createContext({});
@@ -16,12 +16,20 @@ export default function ProductProvider({ children }) {
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [variants, setVariants] = useState();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  let today = new Date()
+  const sevenDaysFromToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
+
+
+  const [date, setDate] = React.useState({
+    from: today,
+    to: sevenDaysFromToday,
+  });
   
   const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm'
   const {authToken} =  useContext(UserContext)
-  let today = new Date()
 
-  const sevenDaysFromToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
 
   // Fetch products
   useEffect(() => {
@@ -73,10 +81,48 @@ export default function ProductProvider({ children }) {
     }
 };
 
-const [date, setDate] = React.useState({
-  from: today,
-  to: sevenDaysFromToday,
-});
+const updateProduct = async (productId) => {
+  setIsLoading(true);
+
+  try {
+    const payload = {
+      productId: productId,
+      images: selectedImages,
+      category: selectedCategory,
+      sub_category: selectedSubCategory,
+      variations: variants,
+      name: name,
+      description: description,
+    };
+
+    // Log the payload data
+    console.log(payload);
+
+    const response = await fetch(`${apiEndpoint}/products/${productId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(data);
+    toast.success('Product updated successfully!');
+  } catch (error) {
+    console.error('Error updating product:', error);
+    toast.error('An error occurred while updating the product.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
 
 
 
@@ -100,7 +146,12 @@ const [date, setDate] = React.useState({
       setSelectedSubCategory,
       setSelectedCategory,
       variants,
-      setVariants
+      setVariants,
+      setName,
+      name,
+      setDescription,
+      description,
+      updateProduct
     }}>
       {children}
     </ProductContext.Provider>

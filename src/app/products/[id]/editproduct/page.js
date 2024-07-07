@@ -63,12 +63,16 @@ import CategoryToggle from "@/app/components/editproduct/CategoryToggle";
 import VariantHandle from "@/app/components/editproduct/VariantHandle";
 import { useContext } from "react";
 import { UserContext } from "@/app/context/UserContext";
+import { ProductContext } from "@/app/context/ProductContext";
 import { useRouter } from "next/navigation";
+import { toast, Toaster } from 'react-hot-toast';
 
 
 
 export default  function Editproduct({params}) {
   const {apiEndpoint} = useContext(UserContext)
+  const {setName, name, setDescription, description, updateProduct} = useContext(ProductContext)
+
   const router = useRouter();
   function stripInt(obj) {
     return parseInt(obj.editproduct, 10);
@@ -77,7 +81,6 @@ export default  function Editproduct({params}) {
   const [product, setProduct] = useState([])
   const [isLoading, setIsLoading] = useState(false);
 console.log(params.id);
-console.log(apiEndpoint);
 
 useEffect(() => {
   setIsLoading(true);
@@ -85,6 +88,7 @@ useEffect(() => {
     .then(response => response.json())
     .then(data => {
       setProduct(data);
+     
       setIsLoading(false);
     })
     .catch(error => {
@@ -92,6 +96,15 @@ useEffect(() => {
       setIsLoading(false);
     });
 }, [params, apiEndpoint]);
+
+useEffect(() => {
+  if (product.name) {
+    setName(product.name);
+  }
+  if (product.description) {
+    setDescription(product.description);
+  }
+}, [product, setDescription, setName]);
 
 
   console.log(product);
@@ -102,6 +115,7 @@ useEffect(() => {
       <SideNav />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          <Toaster/>
           <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="sm:hidden">
@@ -217,7 +231,7 @@ useEffect(() => {
                 <span className="sr-only">Back</span>
               </Button>
               <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                Pro Controller 
+               {product.name} 
               </h1>
               <Badge variant="outline" className="ml-auto sm:ml-0">
                 In stock
@@ -226,7 +240,7 @@ useEffect(() => {
                 <Button variant="outline" size="sm">
                   Discard
                 </Button>
-                <Button size="sm">Save Product</Button>
+                <Button onClick={()=>updateProduct(product.id)} size="sm">Save Product</Button>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
@@ -239,26 +253,28 @@ useEffect(() => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid gap-6">
-                      <div className="grid gap-3">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                          id="name"
-                          type="text"
-                          className="w-full"
-                          defaultValue={product.name}
-                        />
-                      </div>
-                      <div className="grid gap-3">
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea
-                          id="description"
-                          defaultValue={product.description}
-                          className="min-h-32"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
+  <div className="grid gap-6">
+    <div className="grid gap-3">
+      <Label htmlFor="name">Name</Label>
+      <Input
+        id="name"
+        type="text"
+        className="w-full"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+    </div>
+    <div className="grid gap-3">
+      <Label htmlFor="description">Description</Label>
+      <Textarea
+        id="description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        className="min-h-32"
+      />
+    </div>
+  </div>
+</CardContent>
                 </Card>
                 <VariantHandle product={product}/>              
                 

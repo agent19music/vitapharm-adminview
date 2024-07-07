@@ -35,6 +35,12 @@ const{variants, setVariants} = useContext(ProductContext)
     ]);
   };
 
+  const handleInputChange = (index, field, value) => {
+    const newVariants = [...variants];
+    newVariants[index][field] = value;
+    setVariants(newVariants);
+  };
+
   const removeVariant = (indexToRemove) => {
     setVariants(variants.filter((_, index) => index !== indexToRemove));
   };
@@ -64,25 +70,28 @@ const{variants, setVariants} = useContext(ProductContext)
                   GGPC-{variant.id.toString().padStart(3, "0")}
                 </TableCell>
                 <TableCell>
-                  <Label htmlFor={`price-${index}`} className="sr-only">
-                    Price
-                  </Label>
-                  <Input
-                    id={`price-${index}`}
-                    type="number"
-                    defaultValue={variant.price}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Label htmlFor={`size-${index}`} className="sr-only">
-                    Size
-                  </Label>
-                  <Input
-                    id={`size-${index}`}
-                    type="text"
-                    defaultValue={variant.size}
-                  />
-                </TableCell>
+  <Label htmlFor={`price-${index}`} className="sr-only">
+    Price
+  </Label>
+  <Input
+    id={`price-${index}`}
+    type="number"
+    value={variant.price}
+    onChange={(e) => handleInputChange(index, 'price', e.target.value)}
+  />
+</TableCell>
+<TableCell>
+  <Label htmlFor={`size-${index}`} className="sr-only">
+    Size
+  </Label>
+  <Input
+    id={`size-${index}`}
+    type="text"
+    value={variant.size}
+    onChange={(e) => handleInputChange(index, 'size', e.target.value)}
+  />
+</TableCell>
+
                 <TableCell>
                   <Button onClick={() => removeVariant(index)}>
                     <XCircle className="h-3.5 w-3.5" />
