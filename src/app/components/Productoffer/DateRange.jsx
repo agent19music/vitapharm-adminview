@@ -11,18 +11,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { useContext } from "react"
+import { ProductContext } from "@/app/context/ProductContext"
 
 
 export function DatePickerWithRange({ className }) {
-  let today = new Date()
+  const {setDate, date} = useContext(ProductContext)
+//   let today = new Date()
 
-const sevenDaysFromToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
+// const sevenDaysFromToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
 
-const [date, setDate] = React.useState({
-  from: today,
-  to: sevenDaysFromToday,
-});
-
+// const [date, setDate] = React.useState({
+//   from: today,
+//   to: sevenDaysFromToday,
+// });
 
   return (
     <div className={cn("grid gap-2", className)}>

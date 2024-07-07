@@ -1,22 +1,44 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, useContext } from 'react';
-import { isAfter } from 'date-fns';
-import { z } from 'zod';
+import { isAfter, isBefore } from 'date-fns';
 import SideNav from '@/app/components/SideNav';
 import { ProductContext } from '@/app/context/ProductContext';
 import { DatePickerWithRange } from '@/app/components/Productoffer/DateRange';
-const offerSchema = z.object({
-  offerPrice: z.number().positive({ message: 'Price must be positive' }),
-  offerStartDate: z.date().refine((date) => !isAfter(date, new Date()), { message: 'Start date cannot be in the future' }),
-  offerEndDate: z.date().refine((date) => !isAfter(date, new Date()), { message: 'End date cannot be in the future' }),
-});
+import { toast, Toaster } from 'react-hot-toast';
+import AdminPfp from '@/app/components/AdminPfp';
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import Link from "next/link"
+import {
+  File,
+  Home,
+  LineChart,
+  ListFilter,
+  MoreHorizontal,
+  Package,
+  Package2,
+  PanelLeft,
+  PlusCircle,
+  Search,
+  Settings,
+  ShoppingCart,
+  Users2,
+} from "lucide-react"
+
 
 export default function ProductOffer({ params }) {
-  const { apiEndpoint } = useContext(ProductContext);
+  const { apiEndpoint, date } = useContext(ProductContext);
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,63 +67,170 @@ export default function ProductOffer({ params }) {
     formState: { errors },
     setValue,
     watch,
-  } = useForm({
-    resolver: zodResolver(offerSchema),
-  });
+  } = useForm();
 
-  const [dateRange, setDateRange] = useState({
-    from: new Date(),
-    to: new Date(),
-  });
+
 
   useEffect(() => {
-    if (dateRange) {
-      setValue('offerStartDate', dateRange.from);
-      setValue('offerEndDate', dateRange.to);
+    if (date) {
+      setValue('offerStartDate', date.from);
+      setValue('offerEndDate', date.to);
     }
-  }, [dateRange, setValue]);
+  }, [date, setValue]);
+
+  console.log(date);
+  
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed in JavaScript
+    const day = String(date.getDate()).padStart(2, '0');
+  
+    return `${year}-${month}-${day}`;
+  }
 
   const onSubmit = async (data) => {
     if (data.offerPrice >= currentPrice) {
-      alert('Offer price must be lower than the current price');
+      toast.error('Offer price must be lower than the current price', {
+        style: {
+          background: '#713200',
+          color: '#fff',
+        },
+      });
       return;
     }
 
+    const payload = {
+      productId: params.id,
+      deal_price: data.offerPrice,
+      deal_start_time: formatDate(data.offerStartDate),
+      deal_end_time: formatDate(data.offerEndDate),
+    };
+  
+    // Log the data
+    console.log(payload);
+  
     try {
-      const response = await fetch(`${apiEndpoint}/offers`, {
-        method: 'POST',
+      const response = await fetch(`${apiEndpoint}/products/${product.id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          productId: params.id,
-          offerPrice: data.offerPrice,
-          offerStartDate: data.offerStartDate,
-          offerEndDate: data.offerEndDate,
-        }),
+        body: JSON.stringify(payload),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to submit offer');
       }
-
-      alert('Offer submitted successfully!');
+  
+      toast.success('Offer submitted successfully!', {
+        style: {
+          background: '#4ade80',
+          color: '#fff',
+        },
+      });
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to submit offer');
+      toast.error('Failed to submit offer', {
+        style: {
+          background: '#f87171',
+          color: '#fff',
+        },
+      });
     }
   };
-
+  
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <SideNav />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button size="icon" variant="outline" className="sm:hidden">
+                <PanelLeft className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="sm:max-w-xs">
+              <nav className="grid gap-6 text-lg font-medium">
+                <Link
+                  href="#"
+                  className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
+                >
+                  <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
+                  <span className="sr-only">Acme Inc</span>
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  <Home className="h-5 w-5" />
+                  Dashboard
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  Orders
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center gap-4 px-2.5 text-foreground"
+                >
+                  <Package className="h-5 w-5" />
+                  Products
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  <Users2 className="h-5 w-5" />
+                  Customers
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  <LineChart className="h-5 w-5" />
+                  Settings
+                </Link>
+              </nav>
+            </SheetContent>
+          </Sheet>
+          <Breadcrumb className="hidden md:flex">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="#">Dashboard</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/products">Products</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Put on Offer</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className="relative ml-auto flex-1 md:grow-0">
+           
+          </div>
+         <AdminPfp/>
+        </header>
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
             Product Offer
           </h1>
         </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <Toaster/>
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 mt-12">
           {isLoading ? (
             <p>Loading...</p>
           ) : (
@@ -124,8 +253,6 @@ export default function ProductOffer({ params }) {
                   </div>
                   <DatePickerWithRange
                     className="grid gap-3 md:grid-cols-2"
-                    dateRange={dateRange}
-                    setDateRange={setDateRange}
                   />
                   <Button type="submit" className="mt-4">Submit</Button>
                 </div>

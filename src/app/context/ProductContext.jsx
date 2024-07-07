@@ -2,6 +2,8 @@
 
 import { createContext, useState, useEffect, useContext } from 'react';
 import { UserContext } from './UserContext';
+import * as React from "react"
+
 
 // Create the context
 export const ProductContext = createContext({});
@@ -12,6 +14,9 @@ export default function ProductProvider({ children }) {
   const [isLoading, setIsLoading] = useState(false);
   const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm'
   const {authToken} =  useContext(UserContext)
+  let today = new Date()
+
+  const sevenDaysFromToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
 
   // Fetch products
   useEffect(() => {
@@ -63,6 +68,12 @@ export default function ProductProvider({ children }) {
     }
 };
 
+const [date, setDate] = React.useState({
+  from: today,
+  to: sevenDaysFromToday,
+});
+
+
 
   return (
     <ProductContext.Provider value={{
@@ -74,7 +85,9 @@ export default function ProductProvider({ children }) {
       setFilteredProducts,
       setIsLoading,
       deleteProduct,
-      apiEndpoint
+      apiEndpoint,
+      setDate,
+      date
     }}>
       {children}
     </ProductContext.Provider>
