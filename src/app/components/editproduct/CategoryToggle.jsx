@@ -72,7 +72,7 @@ export default function CategoryToggle({ product }) {
     if (product.sub_category) {
       setSelectedSubCategory(product.sub_category);
     }
-  }, [product]);
+  }, [product, setSelectedCategory, setSelectedSubCategory]);
 
   const handleCategoryChange = (value) => {
     setSelectedCategory(value);

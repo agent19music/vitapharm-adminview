@@ -15,6 +15,8 @@ export default function ProductProvider({ children }) {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [variants, setVariants] = useState();
+  
   const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm'
   const {authToken} =  useContext(UserContext)
   let today = new Date()
@@ -96,7 +98,9 @@ const [date, setDate] = React.useState({
       selectedCategory,
       selectedSubCategory,
       setSelectedSubCategory,
-      setSelectedCategory
+      setSelectedCategory,
+      variants,
+      setVariants
     }}>
       {children}
     </ProductContext.Provider>

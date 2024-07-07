@@ -18,14 +18,15 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, XCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { ProductContext } from "@/app/context/ProductContext";
 
 export default function VariantHandle({ product }) {
-  console.log(product);
-  const [variants, setVariants] = useState();
+const{variants, setVariants} = useContext(ProductContext)
+
   useEffect(() => {
     setVariants(product.variations);
-  }, [product.variations]);
+  }, [product.variations, setVariants]);
   
   const addVariant = () => {
     setVariants([
