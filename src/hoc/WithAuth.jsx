@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 const withAuth = (WrappedComponent) => {
@@ -8,7 +8,7 @@ const withAuth = (WrappedComponent) => {
     useEffect(() => {
       // Check if window is available
       if (typeof window !== "undefined") {
-        const authToken = localStorage.getItem('authToken');
+        const authToken =  sessionStorage.getItem('authToken');
 
         // If there's no authToken, redirect to login page
         if (!authToken) {

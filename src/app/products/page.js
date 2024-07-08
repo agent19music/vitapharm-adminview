@@ -76,10 +76,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import withAuth from "@/hoc/WithAuth";
 
 
-
-export default function Dashboard() {
+function ProductsPage() {
 
 
 
@@ -148,7 +148,7 @@ export default function Dashboard() {
                   Dashboard
                 </Link>
                 <Link
-                  href="#"
+                  href="/orders"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -290,3 +290,4 @@ export default function Dashboard() {
     </div>
   )
 }
+export default withAuth(ProductsPage)

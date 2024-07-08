@@ -67,10 +67,9 @@ import { ProductContext } from "@/app/context/ProductContext";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from 'react-hot-toast';
 import AdminPfp from "@/app/components/AdminPfp";
+import withAuth from "@/hoc/WithAuth";
 
-
-
-export default  function Editproduct({params}) {
+function Editproduct({params}) {
   const {apiEndpoint} = useContext(UserContext)
   const {setName, name, setDescription, description, updateProduct} = useContext(ProductContext)
 
@@ -141,7 +140,7 @@ useEffect(() => {
                   Dashboard
                 </Link>
                 <Link
-                  href="#"
+                  href="/orders"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -313,3 +312,4 @@ useEffect(() => {
     </div>
   )
 }
+export default withAuth(Editproduct)

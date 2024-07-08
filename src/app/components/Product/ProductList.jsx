@@ -141,7 +141,8 @@ export default function ProductList({ isLoading, filteredProducts }) {
             <TableBody>
               {currentProducts.map((product) => {
                 const firstVariation = product.variations?.[0];
-                const price = firstVariation ? firstVariation.price : null;
+                const price = product.deal_price === null ? firstVariation.price : product.deal_price;
+                // const price = firstVariation ? firstVariation.price : null;
 
                 return (
                   <TableRow key={product.id}>
@@ -156,7 +157,12 @@ export default function ProductList({ isLoading, filteredProducts }) {
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{product.status}</Badge>
+                    {product.deal_price === null ? (
+                      <Badge variant="outline">-</Badge>
+                    ) : (
+                      <Badge variant="outline">On Offer</Badge>
+                    )}
+
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {price ? `Ksh ${price}` : 'N/A'}

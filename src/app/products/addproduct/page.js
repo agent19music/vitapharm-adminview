@@ -64,6 +64,8 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import SideNav from "@/app/components/SideNav";
+import withAuth from "@/hoc/WithAuth";
+
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
@@ -98,7 +100,7 @@ const formSchema = z
 
 
 
-export default function AddProduct() {
+function AddProduct() {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -200,7 +202,7 @@ export default function AddProduct() {
                   Dashboard
                 </Link>
                 <Link
-                  href="#"
+                  href="/orders"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -481,3 +483,5 @@ export default function AddProduct() {
     </div>
   );
 }
+
+export default withAuth(AddProduct)

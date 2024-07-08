@@ -8,6 +8,7 @@ export const OrderContext = createContext({});
 export default function OrderProvider({ children }) {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
+  const [filteredStatus, setFilteredStatus] = useState([])
   const [isLoading, setIsLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const { authToken } = useContext(UserContext);
@@ -84,6 +85,19 @@ const calculateEarningsFromPaidOrders = useCallback((orders) => {
         setIsLoading(false);
       });
   }, [authToken]);
+  
+  
+    
+  useEffect(() => {
+    const filterPaidOrders = () => {
+      const filtered = Array.isArray(orders) ? orders.filter(order => order.status === 'paid') : [];
+      setFilteredStatus(filtered);
+    }
+  
+    filterPaidOrders();
+  }, [orders]); // This will run every time 'orders' state changes
+  console.log(filteredStatus);
+  
 
   return (
     <OrderContext.Provider value={{
@@ -94,7 +108,8 @@ const calculateEarningsFromPaidOrders = useCallback((orders) => {
       calculateEarningsFromPaidOrders,
       selectedOrder,
       setSelectedOrder,
-      searchOrders
+      searchOrders,
+      filteredStatus
     }}>
       {children}
     </OrderContext.Provider>

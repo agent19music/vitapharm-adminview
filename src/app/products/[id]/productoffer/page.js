@@ -35,9 +35,10 @@ import {
   ShoppingCart,
   Users2,
 } from "lucide-react"
+import withAuth from '@/hoc/WithAuth';
 
 
-export default function ProductOffer({ params }) {
+function ProductOffer({ params }) {
   const { apiEndpoint, date } = useContext(ProductContext);
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -170,7 +171,7 @@ export default function ProductOffer({ params }) {
                   Dashboard
                 </Link>
                 <Link
-                  href="#"
+                  href="/orders"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -264,3 +265,4 @@ export default function ProductOffer({ params }) {
     </div>
   );
 }
+export default withAuth(ProductOffer)
