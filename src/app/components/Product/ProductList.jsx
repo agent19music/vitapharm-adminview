@@ -150,7 +150,7 @@ export default function ProductList({ isLoading, filteredProducts }) {
                         alt="Product image"
                         className="aspect-square rounded-md object-cover"
                         height="64"
-                        src={product.images[0]?.url}
+                        src={`data:image/jpeg;base64,${product.images[0]?.data}`}
                         width="64"
                       />
                     </TableCell>
@@ -178,10 +178,12 @@ export default function ProductList({ isLoading, filteredProducts }) {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/editproduct`)}>Edit</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/productoffer`)}>Put on Offer</DropdownMenuItem>
+
         
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button >Delete</Button>
+              <Button variant="ghost" >Delete</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -192,12 +194,11 @@ export default function ProductList({ isLoading, filteredProducts }) {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={()=> deleteProduct(product.id)}>Delete</AlertDialogAction>
+                <AlertDialogAction  onClick={()=> deleteProduct(product.id)}>Delete</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
      
-        <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/productoffer`)}>Put on Offer</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
                     </TableCell>

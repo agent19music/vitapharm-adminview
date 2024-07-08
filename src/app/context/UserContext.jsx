@@ -57,26 +57,26 @@ export default function UserProvider({ children }) {
     router.push('/')
   }
 
-   // Get Authenticated user
-   useEffect(() => {
-    if (authToken) {
-      fetch(`${apiEndpoint}/admin/authenticated_user`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${authToken}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((response) => {
-          if (response.email) {
-            setCurrentUser(response)
-          } else {
-            setCurrentUser(null)
-          }
-        })
-    }
-  }, [authToken, onchange])
+  //  // Get Authenticated user
+  //  useEffect(() => {
+  //   if (authToken) {
+  //     fetch(`${apiEndpoint}/admin/authenticated_user`, {
+  //       method: 'GET',
+  //       headers: {
+  //         Accept: 'application/json',
+  //         Authorization: `Bearer ${authToken}`,
+  //       },
+  //     })
+  //       .then((res) => res.json())
+  //       .then((response) => {
+  //         if (response.email) {
+  //           setCurrentUser(response)
+  //         } else {
+  //           setCurrentUser(null)
+  //         }
+  //       })
+  //   }
+  // }, [authToken, onchange])
 
   const updateUserContext = () => {
     fetch(`${apiEndpoint}/authenticated_user`, {
@@ -98,7 +98,6 @@ export default function UserProvider({ children }) {
         console.error('Error fetching user data:', error);
       });
   };
-    
 
    
   

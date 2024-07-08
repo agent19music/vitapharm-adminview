@@ -12,7 +12,7 @@ import { useContext } from "react";
 import { OrderContext } from "../context/OrderContext";
 
 export default function OrderList() {
-  const { orders, setSelectedOrder } = useContext(OrderContext);
+  const { orders, setSelectedOrder,  filteredOrders } = useContext(OrderContext);
   console.log(orders);
 
   // Function to format the date
@@ -33,7 +33,7 @@ export default function OrderList() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {orders.map((order) => (
+        {filteredOrders && filteredOrders.map((order) => (
           <TableRow key={order.id} onClick={() => setSelectedOrder(order)}>
             {(order.customerEmail == "" && order.customerFirstName == "")&&
             <TableCell>

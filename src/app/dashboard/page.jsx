@@ -85,7 +85,7 @@ import { useContext, useState, useEffect } from "react"
 import { OrderContext } from "../context/OrderContext"
 
 export default function Dashboard() {
-  const { orders, filterOrders, calculateEarningsFromPaidOrders } = useContext(OrderContext);
+  const { orders, filterOrders, calculateEarningsFromPaidOrders, searchOrders } = useContext(OrderContext);
   const [filter, setFilter] = useState('week');
   const [earnings, setEarnings] = useState(0);
   const [lastEarnings, setLastEarnings] = useState(0);
@@ -179,7 +179,7 @@ export default function Dashboard() {
                   <Link href="#">Orders</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
+              searchOrders     <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage>Recent Orders</BreadcrumbPage>
               </BreadcrumbItem>
@@ -191,6 +191,7 @@ export default function Dashboard() {
               type="search"
               placeholder="Search..."
               className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+              onChange={(e) => searchOrders(e.target.value)}
             />
           </div>
           <DropdownMenu>

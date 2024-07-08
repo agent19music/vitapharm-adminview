@@ -43,6 +43,7 @@ import {
   ShoppingCart,
   Upload,
   Users2,
+  X
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -448,17 +449,20 @@ export default function AddProduct() {
                   <div className="mt-4">
                     <h4 className="font-medium">Selected Images</h4>
                     <ul className="list-disc list-inside">
-                      {selectedImages.map((file, index) => (
-                        <li key={index}>
-                          {file.name}{" "}
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="text-red-500 underline"
-                          >
-                            Remove
-                          </button>
-                        </li>
+                      {selectedImages && selectedImages.map((file, index) => (
+                       <div  key={index} className="relative">
+                       <button onClick={() => removeImage(index)} className="absolute top-0 right-0 p-1 bg-white text-red-500">
+            <X className="h-4 w-4" />
+          </button>
+          
+                        <Image
+                          alt={`Selected image ${index + 1}`}
+                          className="aspect-square w-full rounded-md object-cover"
+                          height="720"
+                          src={file}
+                          width="480"
+                        />
+                      </div>
                       ))}
                     </ul>
                   </div>

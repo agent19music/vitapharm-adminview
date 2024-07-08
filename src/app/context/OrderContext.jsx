@@ -34,7 +34,24 @@ export default function OrderProvider({ children }) {
       }
     });
   }, [orders]);
+console.log(orders);
+  // Search items
+  function searchOrders(query) {
+    let lowerCaseQuery = query.toLowerCase();
 
+    let filtered = orders && orders.filter(order => {
+      let firstname = order.customerFirstName.toLowerCase();
+      let lastname = order.customerLastName.toLowerCase();
+      let email = order.customerEmail.toLowerCase();
+      let paymentref = order.payment_reference ? order.payment_reference.toLowerCase() : "";
+      let phone = order.phone.toLowerCase();
+      let promocode = order.discount_code_applied.toLowerCase();
+
+      return firstname.includes(lowerCaseQuery) || lastname.includes(lowerCaseQuery) || email.includes(lowerCaseQuery) || paymentref.includes(lowerCaseQuery) || phone.includes(lowerCaseQuery) || promocode.includes(lowerCaseQuery);
+    });
+
+    setFilteredOrders(filtered);
+  }
   // Function to calculate the total earnings from the filtered orders
  // Function to calculate the total earnings from the paid orders
 const calculateEarningsFromPaidOrders = useCallback((orders) => {
@@ -76,7 +93,8 @@ const calculateEarningsFromPaidOrders = useCallback((orders) => {
       filterOrders,
       calculateEarningsFromPaidOrders,
       selectedOrder,
-      setSelectedOrder
+      setSelectedOrder,
+      searchOrders
     }}>
       {children}
     </OrderContext.Provider>

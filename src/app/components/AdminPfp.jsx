@@ -48,7 +48,7 @@ export default function AdminPfp() {
       <DropdownMenuLabel>My Account</DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem>Settings</DropdownMenuItem>
-      <AlertDialog>
+      {/* <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button >Delete</Button>
             </AlertDialogTrigger>
@@ -64,7 +64,7 @@ export default function AdminPfp() {
                 <AlertDialogAction>Delete</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
-          </AlertDialog>
+          </AlertDialog> */}
       <DropdownMenuItem>Support</DropdownMenuItem>
       <DropdownMenuSeparator />
      <DropdownMenuItem onClick={logout} >Logout</DropdownMenuItem>

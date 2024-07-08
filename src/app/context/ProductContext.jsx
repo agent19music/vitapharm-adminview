@@ -122,6 +122,7 @@ const updateProduct = async (productId) => {
 };
 
 
+console.log(products);
 
 
 
