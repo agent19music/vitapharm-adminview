@@ -48,14 +48,14 @@ export default function ProductList({ isLoading, filteredProducts }) {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+function formatDate(sqliteDatetime){
+  const date = new Date(sqliteDatetime);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() +1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2,'0');
 
-  // function handleEdit(id) {
-  //   router.push(`products/${id}`);
-  // }
-
-  // function handleOffer(id) {
-  //   router.push(`products/${productname}`);
-  // }
+  return `${year}-${month} -${day}`;
+}
 
   function handlePreviousPage() {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
