@@ -90,7 +90,7 @@ const calculateEarningsFromPaidOrders = useCallback((orders) => {
     
   useEffect(() => {
     const filterPaidOrders = () => {
-      const filtered = Array.isArray(orders) ? orders.filter(order => order.status === 'paid') : [];
+      const filtered = Array.isArray(orders) ? orders.filter(order => order.status === 'Paid') : [];
       setFilteredStatus(filtered);
     }
   
