@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['vitapharms3.s3.amazonaws.com'],
+        domains: ['vitapharms3bucket.s3.amazonaws.com'],
       },
 };
 

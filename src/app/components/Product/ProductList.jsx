@@ -151,7 +151,7 @@ function formatDate(sqliteDatetime){
                         alt="Product image"
                         className="aspect-square rounded-md object-cover"
                         height="64"
-                        src={`data:image/jpeg;base64,${product.images[0]?.data}`}
+                        src={product.images[0]?.url}
                         width="64"
                       />
                     </TableCell>

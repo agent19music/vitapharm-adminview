@@ -10,6 +10,7 @@ export const UserContext = createContext({})
 export default function UserProvider({ children }) {
   const router = useRouter();
     const [currentUser, setCurrentUser] = useState(null)
+    const [appointments, setAppointments] = useState([])
     const [authToken, setAuthToken] = useState(() => {
       if (typeof window !== 'undefined') {
           return sessionStorage.getItem('authToken') ? sessionStorage.getItem('authToken') : null;
@@ -19,7 +20,9 @@ export default function UserProvider({ children }) {
   
       const [onchange, setOnchange] = useState(false)  
 
-    const apiEndpoint = ' http://127.0.0.1:5000/api/vitapharm'
+    // const apiEndpoint = ' http://127.0.0.1:5000/api/vitapharm'
+    const apiEndpoint = 'http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm'
+
 
     function login(email, password) {
       fetch(`${apiEndpoint}/admin/login`, {
@@ -78,26 +81,46 @@ export default function UserProvider({ children }) {
   //   }
   // }, [authToken, onchange])
 
-  const updateUserContext = () => {
-    fetch(`${apiEndpoint}/authenticated_user`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${authToken}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((response) => {
-        if (response.email || response.username) {
-          setCurrentUser(response)
-        } else {
-          setCurrentUser(null)
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching user data:', error);
-      });
-  };
+  // const updateUserContext = () => {
+  //   fetch(`${apiEndpoint}/authenticated_user`, {
+  //     method: 'GET',
+  //     headers: {
+  //       Accept: 'application/json',
+  //       Authorization: `Bearer ${authToken}`,
+  //     },
+  //   })
+  //     .then((res) => res.json())
+  //     .then((response) => {
+  //       if (response.email || response.username) {
+  //         setCurrentUser(response)
+  //       } else {
+  //         setCurrentUser(null)
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error fetching user data:', error);
+  //     });
+  // };
+
+useEffect(()=>{
+  if (authToken) {
+        fetch(`${apiEndpoint}/book`, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${authToken}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((response) => {
+            if (response.email) {
+              setAppointments(response)
+            } else {
+              setAppointments([])
+            }
+          })
+      }
+    }, [authToken])
 
    
   
@@ -110,7 +133,7 @@ export default function UserProvider({ children }) {
     onchange,
     setOnchange, 
     apiEndpoint,
-    updateUserContext
+    appointments
     
   }}>{children}</UserContext.Provider>
 }

@@ -31,7 +31,7 @@ export default function LogIn() {
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Login</h1>
             <p className="text-balance text-muted-foreground">
-              Enter your username below to login to your account
+              Enter your email below to login to your account
             </p>
           </div>
           <div className="grid gap-4">
@@ -62,7 +62,7 @@ export default function LogIn() {
               Login
             </Button>
 
-            <Button
+            {/* <Button
       onClick={() => {
         console.log('click!!');
         toast({
@@ -72,7 +72,7 @@ export default function LogIn() {
       }}
     >
       Show Toast
-    </Button>
+    </Button> */}
           </div>
         </form>
       </div>

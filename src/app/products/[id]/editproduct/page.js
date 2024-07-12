@@ -266,7 +266,7 @@ useEffect(() => {
                     <div className="grid gap-6">
                       <div className="grid gap-3">
                         <Label htmlFor="status">Status</Label>
-                        <Select>
+                        {/* <Select>
                           <SelectTrigger id="status" aria-label="Select status">
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
@@ -275,7 +275,7 @@ useEffect(() => {
                             <SelectItem value="published">Active</SelectItem>
                             <SelectItem value="archived">Archived</SelectItem>
                           </SelectContent>
-                        </Select>
+                        </Select> */}
                       </div>
                     </div>
                   </CardContent>

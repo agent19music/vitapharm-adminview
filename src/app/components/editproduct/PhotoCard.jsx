@@ -35,7 +35,7 @@ const {selectedImages, setSelectedImages} = useContext(ProductContext)
                 alt={`Product image ${index + 1}`}
                 className="aspect-square w-full rounded-md object-cover"
                 height="720"
-                src={`data:image/jpeg;base64,${image.data}`}
+                src={`${image.url}`}
                 width="480"
               />
             </button>
