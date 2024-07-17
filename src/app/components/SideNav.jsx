@@ -49,6 +49,7 @@ export default function SideNav() {
       </TooltipProvider>
       <TooltipProvider>
       <Tooltip>
+        
         <TooltipTrigger asChild>
           <Link
             href="/products"
