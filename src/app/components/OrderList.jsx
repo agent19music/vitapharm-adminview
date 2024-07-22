@@ -11,10 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { useContext } from "react";
 import { OrderContext } from "../context/OrderContext";
 
-export default function OrderList() {
-  const { orders, setSelectedOrder,  filteredOrders } = useContext(OrderContext);
-  console.log(orders);
-
+export default function OrderList({filter}) {
+  const { orders, setSelectedOrder,  filterOrders } = useContext(OrderContext);
+ const filteredOrders = filterOrders(filter);
   // Function to format the date
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -22,6 +21,7 @@ export default function OrderList() {
   };
 
   return (
+
     <Table>
       <TableHeader>
         <TableRow>
