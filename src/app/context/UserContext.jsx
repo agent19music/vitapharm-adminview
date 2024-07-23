@@ -169,7 +169,8 @@ useEffect(()=>{
     onchange,
     setOnchange, 
     apiEndpoint,
-    appointments
+    appointments,
+    filterAppointments
     
   }}>{children}</UserContext.Provider>
 }
