@@ -88,24 +88,41 @@ import withAuth from "@/hoc/WithAuth"
 function OrdersPage() {
   const { orders, filterOrders, calculateEarningsFromPaidOrders, searchOrders } = useContext(OrderContext);
   const [filter, setFilter] = useState('week');
-  const [earnings, setEarnings] = useState(0);
-  const [lastEarnings, setLastEarnings] = useState(0);
+ const [weeklyEarnings, setWeeklyEarnings] = useState(0);
+const [lastWeeklyEarnings, setLastWeeklyEarnings] = useState(0);
+const [monthlyEarnings, setMonthlyEarnings] = useState(0);
+const [lastMonthlyEarnings, setLastMonthlyEarnings] = useState(0);
 
-  useEffect(() => {
-    const filteredOrders = filterOrders(filter);
-    const newEarnings = calculateEarningsFromPaidOrders(filteredOrders);
-    setEarnings(newEarnings);
-  }, [filter, filterOrders, calculateEarningsFromPaidOrders]);
 
-  useEffect(() => {
-    const lastPeriod = filter === 'week' ? 'month' : 'year';
-    const filteredOrders = filterOrders(lastPeriod);
-    const newEarnings = calculateEarningsFromPaidOrders(filteredOrders);
-    setLastEarnings(newEarnings);
-  }, [filter, filterOrders, calculateEarningsFromPaidOrders]);
+useEffect(() => {
+  // Current Week's Earnings
+  const weeklyOrders = filterOrders('week');
+  const newWeeklyEarnings = calculateEarningsFromPaidOrders(weeklyOrders);
+  setWeeklyEarnings(newWeeklyEarnings);
 
-  const earningsIncrease = lastEarnings === 0 ? 100 : ((earnings - lastEarnings) / lastEarnings) * 100;
-  const progress = Math.min(100, earningsIncrease);
+  // Last Week's Earnings
+  const lastWeekOrders = filterOrders('lastWeek');
+  const newLastWeeklyEarnings = calculateEarningsFromPaidOrders(lastWeekOrders);
+  setLastWeeklyEarnings(newLastWeeklyEarnings);
+
+  // Current Month's Earnings
+  const monthlyOrders = filterOrders('month');
+  const newMonthlyEarnings = calculateEarningsFromPaidOrders(monthlyOrders);
+  setMonthlyEarnings(newMonthlyEarnings);
+
+  // Last Month's Earnings
+  const lastMonthOrders = filterOrders('lastMonth');
+  const newLastMonthlyEarnings = calculateEarningsFromPaidOrders(lastMonthOrders);
+  setLastMonthlyEarnings(newLastMonthlyEarnings);
+}, [filter, filterOrders, calculateEarningsFromPaidOrders]);
+
+
+const weeklyEarningsIncrease = lastWeeklyEarnings === 0 ? 100 : ((weeklyEarnings - lastWeeklyEarnings) / lastWeeklyEarnings) * 100;
+const weeklyProgress = Math.min(100, weeklyEarningsIncrease);
+
+const monthlyEarningsIncrease = lastMonthlyEarnings === 0 ? 100 : ((monthlyEarnings - lastMonthlyEarnings) / lastMonthlyEarnings) * 100;
+const monthlyProgress = Math.min(100, monthlyEarningsIncrease);
+
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -235,30 +252,31 @@ function OrdersPage() {
                   <Button>Create New Order</Button>
                 </CardFooter>
               </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardDescription>This Week</CardDescription>
-                  <CardTitle className="text-4xl">Ksh {earnings}</CardTitle>
-                  <CardDescription className="capitalize">
-                    {earningsIncrease}% {earningsIncrease > 0 ? "up" : "down"} from last {filter}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pb-1">
-                  <Progress value={progress} className="h-2" />
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardDescription>This Month</CardDescription>
-                  <CardTitle className="text-4xl">Ksh {earnings}</CardTitle>
-                  <CardDescription className="capitalize">
-                    {earningsIncrease}% {earningsIncrease > 0 ? "up" : "down"} from last {filter}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pb-1">
-                  <Progress value={progress} className="h-2" />
-                </CardContent>
-              </Card>
+             <Card>
+  <CardHeader className="pb-2">
+    <CardDescription>This Week</CardDescription>
+    <CardTitle className="text-4xl">Ksh {weeklyEarnings}</CardTitle>
+    <CardDescription className="capitalize">
+      {Math.floor(weeklyEarningsIncrease)}% {weeklyEarningsIncrease > 0 ? "up" : "down"} from last week
+    </CardDescription>
+  </CardHeader>
+  <CardContent className="pb-1">
+    <Progress value={weeklyProgress} className="h-2" />
+  </CardContent>
+</Card>
+<Card>
+  <CardHeader className="pb-2">
+    <CardDescription>This Month</CardDescription>
+    <CardTitle className="text-4xl">Ksh {monthlyEarnings}</CardTitle>
+    <CardDescription className="capitalize">
+      {monthlyEarningsIncrease}% {monthlyEarningsIncrease > 0 ? "up" : "down"} from last month
+    </CardDescription>
+  </CardHeader>
+  <CardContent className="pb-1">
+    <Progress value={monthlyProgress} className="h-2" />
+  </CardContent>
+</Card>
+
             </div>
             <Card>
               <CardHeader className="border-b p-4">
@@ -278,6 +296,7 @@ function OrdersPage() {
                 </TabsContent>
                 <TabsContent value="year" className="mt-0 p-0">
                   <OrderList filter="year" />
+
                 </TabsContent>
               </Tabs>
             </Card>
