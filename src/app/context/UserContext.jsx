@@ -1,6 +1,6 @@
 'use client'
  
-import { createContext, useState, useEffect } from 'react'
+import { createContext, useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation';
 import {toast} from 'react-hot-toast';
 
@@ -17,6 +17,7 @@ export default function UserProvider({ children }) {
       }
       return null;
   });
+
   
       const [onchange, setOnchange] = useState(false)  
 
@@ -121,6 +122,41 @@ useEffect(()=>{
           })
       }
     }, [authToken])
+
+ const filterAppointments = useCallback((filter) => {
+  const now = new Date();
+  return appointments.filter((appointment) => {
+    const appointmentDate = new Date(appointment.createdAt);
+    switch (filter) {
+      case 'week':
+        const oneWeekAgo = new Date(now);
+        oneWeekAgo.setDate(now.getDate() - 7);
+        return appointmentDate >= oneWeekAgo && appointmentDate <= now;
+      case 'lastWeek':
+        const lastWeekStart = new Date(now);
+        lastWeekStart.setDate(now.getDate() - 14);
+        const lastWeekEnd = new Date(now);
+        lastWeekEnd.setDate(now.getDate() - 7);
+        return appointmentDate >= lastWeekStart && appointmentDate < lastWeekEnd;
+      case 'month':
+        const oneMonthAgo = new Date(now);
+        oneMonthAgo.setMonth(now.getMonth() - 1);
+        return appointmentDate >= oneMonthAgo && appointmentDate <= now;
+      case 'lastMonth':
+        const lastMonthStart = new Date(now);
+        lastMonthStart.setMonth(now.getMonth() - 2);
+        const lastMonthEnd = new Date(now);
+        lastMonthEnd.setMonth(now.getMonth() - 1);
+        return appointmentDate >= lastMonthStart && appointmentDate < lastMonthEnd;
+      case 'year':
+        const oneYearAgo = new Date(now);
+        oneYearAgo.setFullYear(now.getFullYear() - 1);
+        return appointmentDate >= oneYearAgo && appointmentDate <= now;
+      default:
+        return true;
+    }
+  });
+}, [appointments]);
 
    
   
