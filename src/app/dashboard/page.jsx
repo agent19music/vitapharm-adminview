@@ -59,6 +59,8 @@ const [monthlyEarnings, setMonthlyEarnings] = useState(0);
 const [lastMonthlyEarnings, setLastMonthlyEarnings] = useState(0);
 const [monthlyBookings, setMonthlyBookings] = useState(0);
 const [lastMonthlyBookings , setLastMonthlyBookings] = useState(0);
+const [monthlySales, setMonthlySales] = useState(0);
+const [lastMonthlySales , setLastMonthlySales] = useState(0);
 const filteredBookings =[]
 const lastMonthBookings = []
 
@@ -89,10 +91,28 @@ const lastMonthBookings = []
   setLastMonthlyBookings(lastMonthlyBookings);
 }, [filter, filterAppointments, filteredBookings]);
 
-    const monthlyEarningsIncrease = lastMonthlyEarnings === 0 ? 100 : ((monthlyEarnings - lastMonthlyEarnings) / lastMonthlyEarnings) * 100;
+
+ useEffect(() => {
+  
+  // Current Month's Earnings
+  const monthlyOrders = filterOrders('month');
+  const monthlyPaidOrders = Array.isArray(monthlyOrders) ? monthlyOrders.filter(order => order.status === 'Paid') : [];
+  setMonthlySales(monthlyPaidOrders.length);
+
+  // Last Month's Earnings
+  const lastMonthOrders = filterOrders('lastMonth');
+  const lastMonthPaidOrders = Array.isArray(lastMonthOrders) ? lastMonthOrders.filter(order => order.status === 'Paid') : [];
+  setLastMonthlySales(lastMonthPaidOrders.length);
+}, [filter, filterOrders]);
+
+
+const monthlyEarningsIncrease = lastMonthlyEarnings === 0 ? 100 : ((monthlyEarnings - lastMonthlyEarnings) / lastMonthlyEarnings) * 100;
 const monthlyProgress = Math.min(100, monthlyEarningsIncrease);
 
 const monthlyBookingsIncrease = lastMonthlyBookings === 0 ? 100 : ((monthlyBookings - lastMonthlyBookings) / lastMonthlyBookings) * 100;
+
+const monthlySalesIncrease = lastMonthlySales === 0 ? 100 : ((monthlySales - lastMonthlySales) / lastMonthlySales) * 100;
+
   return (
     <div className="flex min-h-screen w-full flex-col pl-8">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
@@ -214,7 +234,7 @@ const monthlyBookingsIncrease = lastMonthlyBookings === 0 ? 100 : ((monthlyBooki
             <CardContent>
               <div className="text-2xl font-bold">+{filteredStatus.length}</div>
               <p className="text-xs text-muted-foreground">
-                +7% from last month
+               {monthlySalesIncrease}% {monthlySalesIncrease > 0 ? "up" : "down"} from last month
               </p>
             </CardContent>
           </Card>
