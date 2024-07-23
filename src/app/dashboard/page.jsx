@@ -45,20 +45,78 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import SideNav from "../components/SideNav"
-import { useContext } from "react"
+import { useContext , useEffect, useState} from "react"
 import { OrderContext } from "../context/OrderContext"
 import withAuth from "@/hoc/WithAuth"
 import { CheckCircle, Hourglass } from "lucide-react"
 import { UserContext } from "../context/UserContext"
 
 function Dashboard() {
-    const {filteredStatus, orders, calculateEarningsFromPaidOrders} = useContext(OrderContext)
-    const {appointments} = useContext(UserContext)
-    console.log(filteredStatus);
+    const {filteredStatus, orders, calculateEarningsFromPaidOrders, filterOrders} = useContext(OrderContext)
+    const {appointments, filterAppointments} = useContext(UserContext)
+const [filter, setFilter] = useState('month');
+const [monthlyEarnings, setMonthlyEarnings] = useState(0);
+const [lastMonthlyEarnings, setLastMonthlyEarnings] = useState(0);
+const [monthlyBookings, setMonthlyBookings] = useState(0);
+const [lastMonthlyBookings , setLastMonthlyBookings] = useState(0);
+const [monthlySales, setMonthlySales] = useState(0);
+const [lastMonthlySales , setLastMonthlySales] = useState(0);
+const filteredBookings =[]
+const lastMonthBookings = []
+
+
+    useEffect(() => {
+  
+  // Current Month's Earnings
+  const monthlyOrders = filterOrders('month');
+  const newMonthlyEarnings = calculateEarningsFromPaidOrders(monthlyOrders);
+  setMonthlyEarnings(newMonthlyEarnings);
+
+  // Last Month's Earnings
+  const lastMonthOrders = filterOrders('lastMonth');
+  const newLastMonthlyEarnings = calculateEarningsFromPaidOrders(lastMonthOrders);
+  setLastMonthlyEarnings(newLastMonthlyEarnings);
+}, [filter, filterOrders, calculateEarningsFromPaidOrders]);
+
+     useEffect(() => {
+  
+  // Current Month's Earnings
+  const filteredBookings = filterAppointments('month');
+  const newMonthlyBookings = filteredBookings.length ;
+  setMonthlyBookings(newMonthlyBookings);
+
+  // Last Month's Earnings
+  const lastMonthBookings = filterAppointments('lastMonth');
+  const lastMonthlyBookings = lastMonthBookings.length;
+  setLastMonthlyBookings(lastMonthlyBookings);
+}, [filter, filterAppointments, filteredBookings]);
+
+
+ useEffect(() => {
+  
+  // Current Month's Earnings
+  const monthlyOrders = filterOrders('month');
+  const monthlyPaidOrders = Array.isArray(monthlyOrders) ? monthlyOrders.filter(order => order.status === 'Paid') : [];
+  setMonthlySales(monthlyPaidOrders.length);
+
+  // Last Month's Earnings
+  const lastMonthOrders = filterOrders('lastMonth');
+  const lastMonthPaidOrders = Array.isArray(lastMonthOrders) ? lastMonthOrders.filter(order => order.status === 'Paid') : [];
+  setLastMonthlySales(lastMonthPaidOrders.length);
+}, [filter, filterOrders]);
+
+
+const monthlyEarningsIncrease = lastMonthlyEarnings === 0 ? 100 : ((monthlyEarnings - lastMonthlyEarnings) / lastMonthlyEarnings) * 100;
+const monthlyProgress = Math.min(100, monthlyEarningsIncrease);
+
+const monthlyBookingsIncrease = lastMonthlyBookings === 0 ? 100 : ((monthlyBookings - lastMonthlyBookings) / lastMonthlyBookings) * 100;
+
+const monthlySalesIncrease = lastMonthlySales === 0 ? 100 : ((monthlySales - lastMonthlySales) / lastMonthlySales) * 100;
+
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className="flex min-h-screen w-full flex-col pl-8">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-       <SideNav/>
+       <SideNav className='mb-4'/>
         <Sheet>
           <SheetTrigger asChild>
             <Button
@@ -148,9 +206,9 @@ function Dashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{calculateEarningsFromPaidOrders(filteredStatus)}</div>
+              <div className="text-2xl font-bold">Ksh {monthlyEarnings}</div>
               <p className="text-xs text-muted-foreground">
-                +20.1% from last month
+      {monthlyEarningsIncrease}% {monthlyEarningsIncrease > 0 ? "up" : "down"} from last month
               </p>
             </CardContent>
           </Card>
@@ -164,7 +222,7 @@ function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{appointments.length}</div>
               <p className="text-xs text-muted-foreground">
-                +0% from last month
+               {monthlyBookingsIncrease}% {monthlyBookingsIncrease > 0 ? "up" : "down"} from last month
               </p>
             </CardContent>
           </Card>
@@ -176,7 +234,7 @@ function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">+{filteredStatus.length}</div>
               <p className="text-xs text-muted-foreground">
-                +7% from last month
+               {monthlySalesIncrease}% {monthlySalesIncrease > 0 ? "up" : "down"} from last month
               </p>
             </CardContent>
           </Card>

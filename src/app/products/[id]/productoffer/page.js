@@ -37,7 +37,6 @@ import {
 } from "lucide-react"
 import withAuth from '@/hoc/WithAuth';
 
-
 function ProductOffer({ params }) {
   const { apiEndpoint, date } = useContext(ProductContext);
   const [product, setProduct] = useState(null);

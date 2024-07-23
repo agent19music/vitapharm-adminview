@@ -3,6 +3,7 @@
 import { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import { UserContext } from './UserContext';
 
+
 export const OrderContext = createContext({});
 
 export default function OrderProvider({ children }) {
@@ -18,26 +19,43 @@ export default function OrderProvider({ children }) {
 
 
   // Function to filter the orders based on the selected tab
-  const filterOrders = useCallback((filter) => {
-    const now = new Date();
-    return orders.filter((order) => {
-      const orderDate = new Date(order.transaction_date);
-      switch (filter) {
-        case 'week':
-          const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
-          return orderDate >= oneWeekAgo;
-        case 'month':
-          const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1));
-          return orderDate >= oneMonthAgo;
-        case 'year':
-          const oneYearAgo = new Date(now.setFullYear(now.getFullYear() - 1));
-          return orderDate >= oneYearAgo;
-        default:
-          return true;
-      }
-    });
-  }, [orders]);
+ const filterOrders = useCallback((filter) => {
+  const now = new Date();
+  return orders.filter((order) => {
+    const orderDate = new Date(order.transaction_date);
+    switch (filter) {
+      case 'week':
+        const oneWeekAgo = new Date(now);
+        oneWeekAgo.setDate(now.getDate() - 7);
+        return orderDate >= oneWeekAgo && orderDate <= now;
+      case 'lastWeek':
+        const lastWeekStart = new Date(now);
+        lastWeekStart.setDate(now.getDate() - 14);
+        const lastWeekEnd = new Date(now);
+        lastWeekEnd.setDate(now.getDate() - 7);
+        return orderDate >= lastWeekStart && orderDate < lastWeekEnd;
+      case 'month':
+        const oneMonthAgo = new Date(now);
+        oneMonthAgo.setMonth(now.getMonth() - 1);
+        return orderDate >= oneMonthAgo && orderDate <= now;
+      case 'lastMonth':
+        const lastMonthStart = new Date(now);
+        lastMonthStart.setMonth(now.getMonth() - 2);
+        const lastMonthEnd = new Date(now);
+        lastMonthEnd.setMonth(now.getMonth() - 1);
+        return orderDate >= lastMonthStart && orderDate < lastMonthEnd;
+      case 'year':
+        const oneYearAgo = new Date(now);
+        oneYearAgo.setFullYear(now.getFullYear() - 1);
+        return orderDate >= oneYearAgo && orderDate <= now;
+      default:
+        return true;
+    }
+  });
+}, [orders]);
+
 console.log(orders);
+console.log(new Date());
   // Search items
   function searchOrders(query) {
     let lowerCaseQuery = query.toLowerCase();
@@ -98,7 +116,6 @@ const calculateEarningsFromPaidOrders = useCallback((orders) => {
   
     filterPaidOrders();
   }, [orders]); // This will run every time 'orders' state changes
-  console.log(filteredStatus);
   
 
   return (
