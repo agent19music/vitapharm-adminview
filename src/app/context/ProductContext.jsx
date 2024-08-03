@@ -28,8 +28,8 @@ export default function ProductProvider({ children }) {
   });
   
   
-  // const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm'
-  const apiEndpoint = 'http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm'
+  const apiEndpoint = 'https://www.vitapharmcosmetics.co.ke/api/vitapharm'
+  // const apiEndpoint = 'http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm'
 
   const {authToken} =  useContext(UserContext)
 
@@ -37,7 +37,12 @@ export default function ProductProvider({ children }) {
   // Fetch products
   useEffect(() => {
     setIsLoading(true);
-    fetch(`${apiEndpoint}/products`)
+    fetch(`${apiEndpoint}/products`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+    })
       .then(response => response.json())
       .then(data => {
         setProducts(data);
@@ -104,7 +109,8 @@ const updateProduct = async (productId) => {
     const response = await fetch(`${apiEndpoint}/products/${productId}`, {
       method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
       },
       body: JSON.stringify(payload),
     });

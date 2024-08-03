@@ -36,19 +36,19 @@ export default function AppointmentList({ filter }) {
           <TableRow key={appointment.id} onClick={() => setSelectedAppointment(appointment)}>
             <TableCell>
               <div className="font-medium">
-                {appointment.customerFirstName} {appointment.customerLastName}
+                {appointment.customer_name}
               </div>
             </TableCell>
             <TableCell className="hidden sm:table-cell">
               <div className="hidden text-sm text-muted-foreground md:inline">
-                {appointment.customerEmail}
+                {appointment.customer_email}
               </div>
             </TableCell>
             <TableCell className="hidden md:table-cell">
               {formatDate(appointment.created_at)}
             </TableCell>
             <TableCell className="text-right">
-              {formatDate(appointment.appointment_date)}
+              {formatDate(appointment.date)}
             </TableCell>
           </TableRow>
         ))}
