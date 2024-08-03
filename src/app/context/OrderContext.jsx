@@ -55,7 +55,6 @@ export default function OrderProvider({ children }) {
 }, [orders]);
 
 console.log(orders);
-console.log(new Date());
   // Search items
   function searchOrders(query) {
     let lowerCaseQuery = query.toLowerCase();

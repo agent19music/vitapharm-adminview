@@ -158,7 +158,7 @@ function AddProduct() {
     }
   
     // Call your API endpoint
-    const response = await fetch('http://127.0.0.1:5000/api/vitapharm/products', {
+    const response = await fetch('https://www.vitapharmcosmetics.co.ke/api/vitapharm/products', {
       method: 'POST',
       body: formData,
     });

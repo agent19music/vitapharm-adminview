@@ -6,6 +6,7 @@ import { useState, useEffect, useContext } from 'react';
 import { isAfter, isBefore } from 'date-fns';
 import SideNav from '@/app/components/SideNav';
 import { ProductContext } from '@/app/context/ProductContext';
+import { UserContext } from '@/app/context/UserContext';
 import { DatePickerWithRange } from '@/app/components/Productoffer/DateRange';
 import { toast, Toaster } from 'react-hot-toast';
 import AdminPfp from '@/app/components/AdminPfp';
@@ -39,6 +40,7 @@ import withAuth from '@/hoc/WithAuth';
 
 function ProductOffer({ params }) {
   const { apiEndpoint, date } = useContext(ProductContext);
+    const { authToken } = useContext(UserContext);
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,7 +48,12 @@ function ProductOffer({ params }) {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`${apiEndpoint}/products/${params.id}`);
+        const response = await  fetch(`${apiEndpoint}/products/${params.id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${bearerToken}`,
+      },
+    });
         const data = await response.json();
         setProduct(data);
         setIsLoading(false);
@@ -102,7 +109,6 @@ function ProductOffer({ params }) {
     }
 
     const payload = {
-      productId: params.id,
       deal_price: data.offerPrice,
       deal_start_time: formatDate(data.offerStartDate),
       deal_end_time: formatDate(data.offerEndDate),
