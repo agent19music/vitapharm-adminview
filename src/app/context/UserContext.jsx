@@ -1,11 +1,12 @@
 'use client'
-
+ 
 import { createContext, useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import {toast} from 'react-hot-toast';
 
+ 
 export const UserContext = createContext({})
-
+ 
 export default function UserProvider({ children }) {
   const router = useRouter();
     const [currentUser, setCurrentUser] = useState(null)
@@ -18,9 +19,8 @@ export default function UserProvider({ children }) {
       return null;
   });
 
-  const [onchange, setOnchange] = useState(false)
-  const apiEndpoint = 'https://www.vitapharmcosmetics.co.ke/api/vitapharm'
-  // const apiEndpoint = ' http://127.0.0.1:8000/api/vitapharm'
+  
+      const [onchange, setOnchange] = useState(false)  
 
     const apiEndpoint = 'https://www.vitapharmcosmetics.co.ke/api/vitapharm'
     // const apiEndpoint = 'http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm'
@@ -34,14 +34,27 @@ export default function UserProvider({ children }) {
         },
         body: JSON.stringify({ email, password }),
       })
-      .catch((error) => {
-        console.error('Error logging in:', error);
-        toast.error('Error logging in'); // Error toast
-      });
-  }
-
-  // Logout user
-  function logout() {
+        .then((res) => res.json())
+        .then((response) => {
+          console.log('Server response:', response); // Log the server response
+          if (response.access_token) {
+            sessionStorage.setItem('authToken', response.access_token);
+            setAuthToken(response.access_token);
+            toast.success("You are now logged in."); // Success toast
+            setOnchange(!onchange);
+            router.push('/products');
+          } else {
+            toast.error("Incorrect username or password"); // Error toast
+          }
+        })
+        .catch((error) => {
+          console.error('Error logging in:', error);
+          toast.error('Error logging in'); // Error toast
+        });
+    }
+    
+       // Logout user
+   function logout() {
     sessionStorage.removeItem('authToken')
     setCurrentUser(null)
     setAuthToken(null)
@@ -156,7 +169,8 @@ useEffect(() => {
       default:
         return true;
     }
-  }, [authToken]);
+  });
+}, [appointments]);
 
 console.log(appointments)
    
