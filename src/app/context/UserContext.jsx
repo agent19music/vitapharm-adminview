@@ -104,25 +104,38 @@ export default function UserProvider({ children }) {
   //     });
   // };
 
-useEffect(()=>{
-  if (authToken) {
-        fetch(`${apiEndpoint}/book`, {
+useEffect(() => {
+  const fetchAppointments = async () => { 
+    if (authToken) {
+      try {
+        const res = await fetch(`${apiEndpoint}/book`, {
           method: 'GET',
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${authToken}`,
           },
-        })
-          .then((res) => res.json())
-          .then((response) => {
-            if (response.email) {
-              setAppointments(response)
-            } else {
-              setAppointments([])
-            }
-          })
+        });
+
+        console.log("Raw API Response:", res); // Log the full response object
+
+        const data = await res.json();
+
+        console.log("Parsed Appointment Data:", data); // Log the parsed JSON data
+
+        if (data.email) { 
+          setAppointments(data);
+        } else {
+          setAppointments([]);
+        }
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
       }
-    }, [authToken])
+    }
+  };
+
+  fetchAppointments(); 
+}, [authToken]);
+
 
  const filterAppointments = useCallback((filter) => {
   const now = new Date();
@@ -159,6 +172,7 @@ useEffect(()=>{
   });
 }, [appointments]);
 
+console.log(appointments)
    
   
 
