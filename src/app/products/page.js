@@ -87,7 +87,7 @@ function ProductsPage() {
   const [isLoading, setIsLoading] = useState(false)
   useEffect(() => {
     setIsLoading(true);
-    fetch('http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm/products')
+    fetch('https://www.vitapharmcosmetics.co.ke/api/vitapharm/products')
       .then(response => response.json())
       .then(data => {
         setProducts(data);

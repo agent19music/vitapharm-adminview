@@ -41,6 +41,7 @@ const ITEMS_PER_PAGE = 10;
 export default function ProductList({ isLoading, filteredProducts }) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
+  console.log(filteredProducts)
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
 
@@ -143,8 +144,7 @@ function formatDate(sqliteDatetime){
                 const firstVariation = product.variations?.[0];
                 const price = product.deal_price === null ? firstVariation.price : product.deal_price;
                 // const price = firstVariation ? firstVariation.price : null;
-
-                return (
+                    return (
                   <TableRow key={product.id}>
                     <TableCell className="hidden sm:table-cell">
                       <Image

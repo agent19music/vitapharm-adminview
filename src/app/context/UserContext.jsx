@@ -11,6 +11,7 @@ export default function UserProvider({ children }) {
   const router = useRouter();
     const [currentUser, setCurrentUser] = useState(null)
     const [appointments, setAppointments] = useState([])
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [authToken, setAuthToken] = useState(() => {
       if (typeof window !== 'undefined') {
           return sessionStorage.getItem('authToken') ? sessionStorage.getItem('authToken') : null;
@@ -21,8 +22,8 @@ export default function UserProvider({ children }) {
   
       const [onchange, setOnchange] = useState(false)  
 
-    // const apiEndpoint = ' http://127.0.0.1:5000/api/vitapharm'
-    const apiEndpoint = 'http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm'
+    const apiEndpoint = 'https://www.vitapharmcosmetics.co.ke/api/vitapharm'
+    // const apiEndpoint = 'http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm'
 
 
     function login(email, password) {
@@ -170,7 +171,9 @@ useEffect(()=>{
     setOnchange, 
     apiEndpoint,
     appointments,
-    filterAppointments
+    filterAppointments,
+    selectedAppointment,
+    setSelectedAppointment
     
   }}>{children}</UserContext.Provider>
 }

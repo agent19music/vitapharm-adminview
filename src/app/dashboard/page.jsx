@@ -278,7 +278,7 @@ const monthlySalesIncrease = lastMonthlySales === 0 ? 100 : ((monthlySales - las
       </TableHeader>
       <TableBody>
         {
-          orders.slice(0, 5).map((order, index) => (
+          orders.slice(-5).map((order, index) => (
             <TableRow key={index}>
               <TableCell>
                 <div className="font-medium">{order.customerFirstName} {order.customerLastName}</div>
@@ -304,7 +304,7 @@ const monthlySalesIncrease = lastMonthlySales === 0 ? 100 : ((monthlySales - las
     <CardTitle>Recent Sales</CardTitle>
   </CardHeader>
   <CardContent className="grid gap-8">
-    {filteredStatus && filteredStatus.slice(0, 7).map((order, index) => (
+    {filteredStatus && filteredStatus.slice(-7).map((order, index) => (
       <div className="flex items-center gap-4" key={index}>
         <Avatar className="hidden h-9 w-9 sm:flex">
           <AvatarImage src={`/avatars/0${index+1}.png`} alt="Avatar" />

@@ -70,7 +70,7 @@ import AdminPfp from "@/app/components/AdminPfp";
 import withAuth from "@/hoc/WithAuth";
 
 function Editproduct({params}) {
-  const {apiEndpoint} = useContext(UserContext)
+  const {apiEndpoint, authToken} = useContext(UserContext)
   const {setName, name, setDescription, description, updateProduct} = useContext(ProductContext)
 
   const router = useRouter();
@@ -83,19 +83,50 @@ function Editproduct({params}) {
 console.log(params.id);
 
 useEffect(() => {
-  setIsLoading(true);
-  fetch(`${apiEndpoint}/products/${params.id}`)
-    .then(response => response.json())
-    .then(data => {
-      setProduct(data);
-     
-      setIsLoading(false);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      setIsLoading(false);
-    });
-}, [params, apiEndpoint]);
+  // Avoid unnecessary fetch if productId or apiEndpoint is not present
+  if (!params.id || !apiEndpoint) {
+    return;
+  }
+
+  const abortController = new AbortController(); // For handling potential race conditions
+
+  const fetchProduct = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${apiEndpoint}/products/${params.id}`, {
+        signal: abortController.signal, // Link the fetch to the abort controller
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setProduct(data); 
+    } catch (error) {
+      // Handle errors, but only if the fetch was not aborted
+      if (!abortController.signal.aborted) {
+        console.error('Error fetching product:', error);
+        // You might want to handle the error more gracefully in your UI
+        // For example, set an error state and display an error message to the user
+      }
+    } finally {
+      setIsLoading(false); 
+    }
+  };
+
+  fetchProduct();
+
+  return () => {
+    abortController.abort(); // Cleanup: cancel the fetch on component unmount
+  };
+}, [params.id, apiEndpoint, authToken]); // Correct dependency array
+
 
 useEffect(() => {
   if (product.name) {

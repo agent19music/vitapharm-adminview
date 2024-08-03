@@ -10,10 +10,13 @@ import { Label } from '@/components/ui/label';
 import SideNav from '../components/SideNav';
 import { ProductContext } from '@/app/context/ProductContext';
 import {usePathname} from 'next/navigation'
+import { UserContext } from '@/app/context/UserContext';
+
 
 const PromoCodeForm = () => {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
   const { apiEndpoint, date, setDate } = useContext(ProductContext);
+  const {authToken} = useContext(UserContext)
   const currentPath = usePathname()
 
   useEffect(() => {
@@ -35,6 +38,7 @@ const PromoCodeForm = () => {
     const payload = {
       code: data.promoCode,
       discount_percentage: data.discount,
+      start_date: formatDate(data.startDate),
       expiration_date: formatDate(data.endDate),
     };
 
@@ -46,6 +50,7 @@ const PromoCodeForm = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization' : `Bearer ${authToken}`
         },
         body: JSON.stringify(payload),
       });
