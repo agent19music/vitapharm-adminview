@@ -11,14 +11,18 @@ export default function SingleAppointment() {
   const { selectedAppointment } = useContext(UserContext);
   console.log(selectedAppointment);
 
+  if (!selectedAppointment) {
+    return <div>No appointment selected</div>;
+  }
+
   return (
     <div>
       <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-4">
         <CardHeader className="flex flex-row items-start bg-muted/50">
           <div className="grid gap-0.5">
-            {selectedAppointment && selectedAppointment.appointment_type && (
+            {selectedAppointment && selectedAppointment.type && (
               <CardTitle className="group flex items-center gap-2 text-lg">
-                Appointment {selectedAppointment.appointment_type}
+                Appointment {selectedAppointment.type}
                 <Button
                   size="icon"
                   variant="outline"
@@ -29,9 +33,9 @@ export default function SingleAppointment() {
                 </Button>
               </CardTitle>
             )}
-            <CardDescription>Date: {new Date(selectedAppointment && selectedAppointment.appointment_date).toLocaleDateString()}</CardDescription>
+            <CardDescription>Date: {new Date(selectedAppointment.date).toLocaleDateString()}</CardDescription>
           </div>
-          <div className="ml-auto flex items-center gap-1">
+          {/* <div className="ml-auto flex items-center gap-1">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="outline" className="h-8 w-8">
@@ -46,7 +50,7 @@ export default function SingleAppointment() {
                 <DropdownMenuItem>Trash</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </div> */}
         </CardHeader>
         <CardContent className="p-6 text-sm">
           <div className="grid gap-3">
@@ -54,11 +58,11 @@ export default function SingleAppointment() {
             <ul className="grid gap-3">
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Appointment Type</span>
-                <span>{selectedAppointment && selectedAppointment.appointment_type}</span>
+                <span>{selectedAppointment.type}</span>
               </li>
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Date</span>
-                <span>{new Date(selectedAppointment && selectedAppointment.appointment_date).toLocaleDateString()}</span>
+                <span>{new Date(selectedAppointment.date).toLocaleDateString()}</span>
               </li>
             </ul>
             <Separator className="my-2" />
@@ -69,18 +73,18 @@ export default function SingleAppointment() {
             <dl className="grid gap-3">
               <div className="flex items-center justify-between">
                 <dt className="text-muted-foreground">Customer</dt>
-                <dd>{selectedAppointment && selectedAppointment.customerFirstName} {selectedAppointment && selectedAppointment.customerLastName}</dd>
+                <dd>{selectedAppointment.customer_name}</dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-muted-foreground">Email</dt>
                 <dd>
-                  <a href={`mailto:${selectedAppointment && selectedAppointment.customerEmail}`}>{selectedAppointment && selectedAppointment.customerEmail}</a>
+                  <a href={`mailto:${selectedAppointment.customer_email}`}>{selectedAppointment.customer_email}</a>
                 </dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-muted-foreground">Phone</dt>
                 <dd>
-                  <a href={`tel:${selectedAppointment && selectedAppointment.phone}`}>{selectedAppointment && selectedAppointment.phone}</a>
+                  <a href={`tel:${selectedAppointment.customer_phone}`}>{selectedAppointment.customer_phone}</a>
                 </dd>
               </div>
             </dl>
@@ -88,9 +92,9 @@ export default function SingleAppointment() {
         </CardContent>
         <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
           <div className="text-xs text-muted-foreground">
-            Updated <time dateTime={selectedAppointment && selectedAppointment.created_at}>{new Date(selectedAppointment && selectedAppointment.created_at).toLocaleDateString()}</time>
+            Updated <time dateTime={selectedAppointment.created_at}>{new Date(selectedAppointment.created_at).toLocaleDateString()}</time>
           </div>
-          <Pagination className="ml-auto mr-0 w-auto">
+          {/* <Pagination className="ml-auto mr-0 w-auto">
             <PaginationContent>
               <PaginationItem>
                 <Button size="icon" variant="outline" className="h-6 w-6">
@@ -105,7 +109,7 @@ export default function SingleAppointment() {
                 </Button>
               </PaginationItem>
             </PaginationContent>
-          </Pagination>
+          </Pagination> */}
         </CardFooter>
       </Card>
     </div>

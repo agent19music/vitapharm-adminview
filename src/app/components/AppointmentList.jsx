@@ -26,11 +26,10 @@ export default function AppointmentList({ filter }) {
       <TableHeader>
         <TableRow>
           <TableHead>Customer</TableHead>
-          <TableHead className="hidden sm:table-cell">Email</TableHead>
+          <TableHead className="hidden sm:table-cell">Phone</TableHead>
           <TableHead className="hidden md:table-cell">Created At</TableHead>
           <TableHead className="text-right">Appointment Date</TableHead>
-                    <TableHead className="text-right">Appointment Type</TableHead>
-
+          <TableHead className="text-right">Appointment Type</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -43,7 +42,7 @@ export default function AppointmentList({ filter }) {
             </TableCell>
             <TableCell className="hidden sm:table-cell">
               <div className="hidden text-sm text-muted-foreground md:inline">
-                {appointment.customer_email}
+                {appointment.customer_phone}
               </div>
             </TableCell>
             <TableCell className="hidden md:table-cell">
@@ -52,8 +51,8 @@ export default function AppointmentList({ filter }) {
             <TableCell className="text-right">
               {formatDate(appointment.date)}
             </TableCell>
-             <TableCell className="text-right">
-              {formatDate(appointment.type)}
+            <TableCell className="text-right">
+              {appointment.type}
             </TableCell>
           </TableRow>
         ))}
