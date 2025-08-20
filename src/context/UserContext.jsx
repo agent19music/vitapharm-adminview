@@ -21,17 +21,17 @@ export default function UserProvider({ children }) {
   
       const [onchange, setOnchange] = useState(false)  
 
-    // const apiEndpoint = ' http://127.0.0.1:5000/api/vitapharm'
-    const apiEndpoint = 'http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm'
+      const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT ; // Replace with your API endpoint
 
 
-    function login(email, password) {
-      fetch(`${apiEndpoint}/admin/login`, {
+
+    function login(username, password) {
+      fetch(`${apiEndpoint}/seller_login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       })
         .then((res) => res.json())
         .then((response) => {

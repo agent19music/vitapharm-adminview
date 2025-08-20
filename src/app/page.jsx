@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image"
 import Link from "next/link"
-import { UserContext } from "./context/UserContext"
+import { UserContext } from "@/context/UserContext"
 import { useContext, useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
 import { Toast, ToastProvider } from "@/components/ui/toast";
@@ -12,13 +12,13 @@ import { Label } from "@/components/ui/label"
 
 export default function LogIn() {
   const { login, apiEndpoint } = useContext(UserContext)
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const {toast} = useToast()
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login(email, password);
+    login(username, password);
   }
 
   return (
@@ -29,21 +29,21 @@ export default function LogIn() {
         </ToastProvider>
         <form onSubmit={handleSubmit} className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold">Login</h1>
+            <h1 className="text-3xl font-bold">Welcome back</h1>
             <p className="text-balance text-muted-foreground">
-              Enter your email below to login to your account
+              Enter your username below to login to your camposocial seller profile
             </p>
           </div>
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="Email">Email</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="Email"
-                type="Email"
-                placeholder="user@mail.com"
+                id="Username"
+                type="text"
+                placeholder="usename"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
@@ -62,23 +62,13 @@ export default function LogIn() {
               Login
             </Button>
 
-            {/* <Button
-      onClick={() => {
-        console.log('click!!');
-        toast({
-          title: "Scheduled: Catch up",
-          description: "Friday, February 10, 2023 at 5:57 PM",
-        })
-      }}
-    >
-      Show Toast
-    </Button> */}
+         
           </div>
         </form>
       </div>
       <div className="hidden bg-muted lg:flex lg:items-center lg:justify-center">
       <Image
-      src="/logo.png"
+      src="https://pub-c6a134c8e1fd4881a475bf80bc0717ba.r2.dev/logo.png"
       alt="Logo"
       width="288"
       height="162"

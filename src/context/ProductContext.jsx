@@ -28,8 +28,7 @@ export default function ProductProvider({ children }) {
   });
   
   
-  // const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm'
-  const apiEndpoint = 'http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm'
+  const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT || 'https://api.example.com'; // Replace with your API endpoint
 
   const {authToken} =  useContext(UserContext)
 

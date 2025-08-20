@@ -14,9 +14,7 @@ export default function OrderProvider({ children }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const { authToken } = useContext(UserContext);
 
-  // const apiEndpoint = 'http://127.0.0.1:5000/api/vitapharm';
-  const apiEndpoint = 'http://vitapharm-server-env.eba-k5q68s3p.eu-north-1.elasticbeanstalk.com/api/vitapharm'
-
+  const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT || 'https://api.example.com'; // Replace with your API endpoint
 
   // Function to filter the orders based on the selected tab
  const filterOrders = useCallback((filter) => {
@@ -55,7 +53,7 @@ export default function OrderProvider({ children }) {
 }, [orders]);
 
 console.log(orders);
-console.log(new Date());
+
   // Search items
   function searchOrders(query) {
     let lowerCaseQuery = query.toLowerCase();
