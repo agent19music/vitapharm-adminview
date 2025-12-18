@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ProductContext } from "@/app/context/ProductContext";
+import { ProductContext } from "@/context/ProductContext";
 
 const categories = [
   "face",
@@ -63,7 +63,7 @@ const sub_categories = [
 ].sort();
 
 export default function CategoryToggle({ product }) {
-  const{selectedCategory, selectedSubCategory, setSelectedCategory, setSelectedSubCategory} = useContext(ProductContext)
+  const { selectedCategory, selectedSubCategory, setSelectedCategory, setSelectedSubCategory } = useContext(ProductContext)
 
   useEffect(() => {
     if (product.category) {

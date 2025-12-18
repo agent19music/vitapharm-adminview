@@ -17,17 +17,17 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, XCircle } from "lucide-react";
+import { PlusCircle, XCircle } from "phosphor-react";
 import { useState, useEffect, useContext } from "react";
-import { ProductContext } from "@/app/context/ProductContext";
+import { ProductContext } from "@/context/ProductContext";
 
 export default function VariantHandle({ product }) {
-const{variants, setVariants} = useContext(ProductContext)
+  const { variants, setVariants } = useContext(ProductContext)
 
   useEffect(() => {
     setVariants(product.variations);
   }, [product.variations, setVariants]);
-  
+
   const addVariant = () => {
     setVariants([
       ...variants,
@@ -70,27 +70,27 @@ const{variants, setVariants} = useContext(ProductContext)
                   GGPC-{variant.id.toString().padStart(3, "0")}
                 </TableCell>
                 <TableCell>
-  <Label htmlFor={`price-${index}`} className="sr-only">
-    Price
-  </Label>
-  <Input
-    id={`price-${index}`}
-    type="number"
-    value={variant.price}
-    onChange={(e) => handleInputChange(index, 'price', e.target.value)}
-  />
-</TableCell>
-<TableCell>
-  <Label htmlFor={`size-${index}`} className="sr-only">
-    Size
-  </Label>
-  <Input
-    id={`size-${index}`}
-    type="text"
-    value={variant.size}
-    onChange={(e) => handleInputChange(index, 'size', e.target.value)}
-  />
-</TableCell>
+                  <Label htmlFor={`price-${index}`} className="sr-only">
+                    Price
+                  </Label>
+                  <Input
+                    id={`price-${index}`}
+                    type="number"
+                    value={variant.price}
+                    onChange={(e) => handleInputChange(index, 'price', e.target.value)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Label htmlFor={`size-${index}`} className="sr-only">
+                    Size
+                  </Label>
+                  <Input
+                    id={`size-${index}`}
+                    type="text"
+                    value={variant.size}
+                    onChange={(e) => handleInputChange(index, 'size', e.target.value)}
+                  />
+                </TableCell>
 
                 <TableCell>
                   <Button onClick={() => removeVariant(index)}>

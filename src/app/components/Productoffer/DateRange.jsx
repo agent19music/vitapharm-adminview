@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CalendarIcon } from "@radix-ui/react-icons"
+import { CalendarBlank } from "phosphor-react"
 import { addDays, format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -12,19 +12,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useContext } from "react"
-import { ProductContext } from "@/app/context/ProductContext"
+import { ProductContext } from "@/context/ProductContext"
 
 
 export function DatePickerWithRange({ className }) {
-  const {setDate, date} = useContext(ProductContext)
-//   let today = new Date()
+  const { setDate, date } = useContext(ProductContext)
+  //   let today = new Date()
 
-// const sevenDaysFromToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
+  // const sevenDaysFromToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
 
-// const [date, setDate] = React.useState({
-//   from: today,
-//   to: sevenDaysFromToday,
-// });
+  // const [date, setDate] = React.useState({
+  //   from: today,
+  //   to: sevenDaysFromToday,
+  // });
 
 
 
@@ -40,7 +40,7 @@ export function DatePickerWithRange({ className }) {
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarBlank className="mr-2 h-4 w-4" />
             {date?.from ? (
               date.to ? (
                 <>

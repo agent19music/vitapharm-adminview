@@ -1,11 +1,11 @@
 import { CardHeader, CardContent, CardTitle, CardDescription, Card, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, ChevronLeft, ChevronRight } from "lucide-react";
+import { CaretLeft, CaretRight, Copy } from "phosphor-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 import { useContext } from "react";
-import { UserContext } from "../context/UserContext";
+import { UserContext } from "@/context/UserContext";
 
 export default function SingleAppointment() {
   const { selectedAppointment } = useContext(UserContext);
@@ -35,7 +35,7 @@ export default function SingleAppointment() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="outline" className="h-8 w-8">
-                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <CaretLeft className="h-3.5 w-3.5" />
                   <span className="sr-only">Previous Appointment</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -94,13 +94,13 @@ export default function SingleAppointment() {
             <PaginationContent>
               <PaginationItem>
                 <Button size="icon" variant="outline" className="h-6 w-6">
-                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <CaretLeft className="h-3.5 w-3.5" />
                   <span className="sr-only">Previous Appointment</span>
                 </Button>
               </PaginationItem>
               <PaginationItem>
                 <Button size="icon" variant="outline" className="h-6 w-6">
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <CaretRight className="h-3.5 w-3.5" />
                   <span className="sr-only">Next Appointment</span>
                 </Button>
               </PaginationItem>

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useContext } from "react";
-import { UserContext } from "../context/UserContext";
+import { UserContext } from "@/context/UserContext";
 
 export default function AppointmentList({ filter }) {
   const { appointments, setSelectedAppointment, filterAppointments } = useContext(UserContext);

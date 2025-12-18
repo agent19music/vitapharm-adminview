@@ -18,9 +18,9 @@ import {
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal } from 'lucide-react';
+import { DotsThree } from "phosphor-react";
 import { useRouter } from 'next/navigation';
-import { Skeleton } from '@/components/ui/skeleton'; 
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,7 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { ProductContext } from '@/app/context/ProductContext';
+import { ProductContext } from '@/context/ProductContext';
 
 
 
@@ -48,14 +48,14 @@ export default function ProductList({ isLoading, filteredProducts }) {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-function formatDate(sqliteDatetime){
-  const date = new Date(sqliteDatetime);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() +1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2,'0');
+  function formatDate(sqliteDatetime) {
+    const date = new Date(sqliteDatetime);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
 
-  return `${year}-${month} -${day}`;
-}
+    return `${year}-${month} -${day}`;
+  }
 
   function handlePreviousPage() {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -64,10 +64,10 @@ function formatDate(sqliteDatetime){
   function handleNextPage() {
     setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
   }
-  const {deleteProduct} = useContext(ProductContext)
+  const { deleteProduct } = useContext(ProductContext)
 
- 
-   
+
+
 
 
   return (
@@ -112,7 +112,7 @@ function formatDate(sqliteDatetime){
                 </TableCell>
                 <TableCell>
                   <Button aria-haspopup="true" size="icon" variant="ghost" disabled>
-                    <MoreHorizontal className="h-4 w-4" />
+                    <DotsThree className="h-4 w-4" />
                     <span className="sr-only">Toggle menu</span>
                   </Button>
                 </TableCell>
@@ -140,9 +140,9 @@ function formatDate(sqliteDatetime){
             </TableHeader>
             <TableBody>
               {currentProducts.map((product) => {
-                const firstVariation = product.variations?.[0];
-                const price = product.deal_price === null ? firstVariation.price : product.deal_price;
-                // const price = firstVariation ? firstVariation.price : null;
+                const price = product.price || (product.variations?.[0]?.price ?? 0);
+                const imageUrl = product.images?.[0] || '/placeholder.png';
+                const isOnOffer = product.deal_price != null;
 
                 return (
                   <TableRow key={product.id}>
@@ -151,62 +151,62 @@ function formatDate(sqliteDatetime){
                         alt="Product image"
                         className="aspect-square rounded-md object-cover"
                         height="64"
-                        src={product.images[0]?.url}
+                        src={imageUrl}
                         width="64"
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell className="font-medium">{product.title || product.name}</TableCell>
                     <TableCell>
-                    {product.deal_price === null ? (
-                      <Badge variant="outline">-</Badge>
-                    ) : (
-                      <Badge variant="outline">On Offer</Badge>
-                    )}
+                      {isOnOffer ? (
+                        <Badge variant="secondary">On Offer</Badge>
+                      ) : (
+                        <Badge variant="outline">Active</Badge>
+                      )}
 
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {price ? `Ksh ${price}` : 'N/A'}
+                      {price ? `KES ${price.toLocaleString()}` : 'N/A'}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {product.totalSales}
+                      {product.total_sales || 0}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {product.createdAt}
+                      {formatDate(product.created_at)}
                     </TableCell>
                     <TableCell>
-                    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button aria-haspopup="true" size="icon" variant="ghost">
-          <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Toggle menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/editproduct`)}>Edit</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/productoffer`)}>Put on Offer</DropdownMenuItem>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <DotsThree className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/editproduct`)}>Edit</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => router.push(`/products/${product.id}/productoffer`)}>Put on Offer</DropdownMenuItem>
 
-        
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" >Delete</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete this product.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction  onClick={()=> deleteProduct(product.id)}>Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-     
-      </DropdownMenuContent>
-    </DropdownMenu>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" >Delete</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete this product.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteProduct(product.id)}>Delete</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 );

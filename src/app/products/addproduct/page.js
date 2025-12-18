@@ -31,20 +31,19 @@ import {
 } from "@/components/ui/tooltip"
 
 import {
-  ChevronLeft,
-  Home,
-  LineChart,
+  CaretLeft,
+  ChartLine,
+  Gear,
+  House,
+  MagnifyingGlass,
   Package,
-  Package2,
-  PanelLeft,
   PlusCircle,
-  Search,
-  Settings,
   ShoppingCart,
-  Upload,
-  Users2,
-  X
-} from "lucide-react"
+  SidebarSimple,
+  UploadSimple,
+  UsersThree,
+  X,
+} from "phosphor-react"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -157,8 +156,15 @@ function AddProduct() {
       console.log(pair[0] + ', ' + pair[1]);
     }
   
+    const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT;
+    
+    if (!apiEndpoint) {
+      console.error('API endpoint not configured');
+      return;
+    }
+  
     // Call your API endpoint
-    const response = await fetch('http://127.0.0.1:5000/api/vitapharm/products', {
+    const response = await fetch(`${apiEndpoint}/api/vitapharm/products`, {
       method: 'POST',
       body: formData,
     });
@@ -181,7 +187,7 @@ function AddProduct() {
           <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="sm:hidden">
-                <PanelLeft className="h-5 w-5" />
+                <SidebarSimple className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
@@ -191,14 +197,14 @@ function AddProduct() {
                   href="#"
                   className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
                 >
-                  <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
+                  <Package className="h-5 w-5 transition-all group-hover:scale-110" />
                   <span className="sr-only">Acme Inc</span>
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <Home className="h-5 w-5" />
+                  <House className="h-5 w-5" />
                   Dashboard
                 </Link>
                 <Link
@@ -219,14 +225,14 @@ function AddProduct() {
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <Users2 className="h-5 w-5" />
+                  <UsersThree className="h-5 w-5" />
                   Customers
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <LineChart className="h-5 w-5" />
+                  <ChartLine className="h-5 w-5" />
                   Settings
                 </Link>
               </nav>

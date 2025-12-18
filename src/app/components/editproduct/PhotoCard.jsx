@@ -4,11 +4,11 @@ import {
   CardContent,
 } from "@/components/ui/card"
 import Image from "next/image"
-import { Upload, X } from "lucide-react"
-import { ProductContext } from '@/app/context/ProductContext';
+import { UploadSimple, X } from "phosphor-react"
+import { ProductContext } from '@/context/ProductContext';
 
-export default function PhotoCard({product}) {
-const {selectedImages, setSelectedImages} = useContext(ProductContext)
+export default function PhotoCard({ product }) {
+  const { selectedImages, setSelectedImages } = useContext(ProductContext)
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -41,11 +41,11 @@ const {selectedImages, setSelectedImages} = useContext(ProductContext)
             </button>
           ))}
           <hr />
-          {selectedImages &&  selectedImages.map((image, index) => (
+          {selectedImages && selectedImages.map((image, index) => (
             <div key={index} className="relative">
-             <button onClick={() => removeSelectedImage(index)} className="absolute top-0 right-0 p-1 bg-white text-red-500">
-  <X className="h-4 w-4" />
-</button>
+              <button onClick={() => removeSelectedImage(index)} className="absolute top-0 right-0 p-1 bg-white text-red-500">
+                <X className="h-4 w-4" />
+              </button>
 
               <Image
                 alt={`Selected image ${index + 1}`}
@@ -57,7 +57,7 @@ const {selectedImages, setSelectedImages} = useContext(ProductContext)
             </div>
           ))}
           <button className="relative flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
-            <Upload className="h-4 w-4 text-muted-foreground" />
+            <UploadSimple className="h-4 w-4 text-muted-foreground" />
             <input
               type="file"
               accept="image/*"

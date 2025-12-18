@@ -1,62 +1,19 @@
 "use client"
-import Image from "next/image"
+
+import { useContext, useState } from "react"
 import Link from "next/link"
 import {
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  CreditCard,
-  File,
-  Home,
-  LineChart,
-  ListFilter,
-  MoreVertical,
-  Package,
-  Package2,
-  PanelLeft,
-  Search,
-  Settings,
   ShoppingCart,
-  Truck,
-  Users2,
-} from "lucide-react"
+  MagnifyingGlass,
+  FunnelSimple,
+  ArrowUpRight,
+  Eye
+} from "phosphor-react"
 
-import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination"
-import { Progress } from "@/components/ui/progress"
-import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -66,245 +23,152 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
-import SingleOrder from "../components/SingleOrder"
-import OrderList from "../components/OrderList"
 import SideNav from "../components/SideNav"
-import { useContext, useState, useEffect } from "react"
-import { OrderContext } from "../context/OrderContext"
+import EmptyState from "../components/EmptyState"
+import { ThemeToggle } from "../components/ThemeToggle"
 import withAuth from "@/hoc/WithAuth"
+import { OrderContext } from "../../context/OrderContext"
 
 function OrdersPage() {
-  const { orders, filterOrders, calculateEarningsFromPaidOrders, searchOrders } = useContext(OrderContext);
-  const [filter, setFilter] = useState('week');
- const [weeklyEarnings, setWeeklyEarnings] = useState(0);
-const [lastWeeklyEarnings, setLastWeeklyEarnings] = useState(0);
-const [monthlyEarnings, setMonthlyEarnings] = useState(0);
-const [lastMonthlyEarnings, setLastMonthlyEarnings] = useState(0);
+  const { orders, isLoading, statusFilter, setStatusFilter, searchOrders } = useContext(OrderContext)
+  const [searchQuery, setSearchQuery] = useState('')
 
+  const handleSearch = (query) => {
+    setSearchQuery(query)
+    searchOrders(query)
+  }
 
-useEffect(() => {
-  // Current Week's Earnings
-  const weeklyOrders = filterOrders('week');
-  const newWeeklyEarnings = calculateEarningsFromPaidOrders(weeklyOrders);
-  setWeeklyEarnings(newWeeklyEarnings);
+  const formatCurrency = (amount) => {
+    return `Ksh ${(amount || 0).toLocaleString()}`
+  }
 
-  // Last Week's Earnings
-  const lastWeekOrders = filterOrders('lastWeek');
-  const newLastWeeklyEarnings = calculateEarningsFromPaidOrders(lastWeekOrders);
-  setLastWeeklyEarnings(newLastWeeklyEarnings);
-
-  // Current Month's Earnings
-  const monthlyOrders = filterOrders('month');
-  const newMonthlyEarnings = calculateEarningsFromPaidOrders(monthlyOrders);
-  setMonthlyEarnings(newMonthlyEarnings);
-
-  // Last Month's Earnings
-  const lastMonthOrders = filterOrders('lastMonth');
-  const newLastMonthlyEarnings = calculateEarningsFromPaidOrders(lastMonthOrders);
-  setLastMonthlyEarnings(newLastMonthlyEarnings);
-}, [filter, filterOrders, calculateEarningsFromPaidOrders]);
-
-
-const weeklyEarningsIncrease = lastWeeklyEarnings === 0 ? 100 : ((weeklyEarnings - lastWeeklyEarnings) / lastWeeklyEarnings) * 100;
-const weeklyProgress = Math.min(100, weeklyEarningsIncrease);
-
-const monthlyEarningsIncrease = lastMonthlyEarnings === 0 ? 100 : ((monthlyEarnings - lastMonthlyEarnings) / lastMonthlyEarnings) * 100;
-const monthlyProgress = Math.min(100, monthlyEarningsIncrease);
-
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+      processing: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+      shipped: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+      delivered: 'bg-green-500/10 text-green-500 border-green-500/20',
+      cancelled: 'bg-red-500/10 text-red-500 border-red-500/20'
+    }
+    return colors[status] || 'bg-muted text-muted-foreground'
+  }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">
-      {/* THIS IS THE SIDENAV */}
-      <SideNav/>
+    <div className="flex min-h-screen w-full flex-col bg-background">
+      <SideNav />
+
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="sm:hidden">
-                <PanelLeft className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-xs">
-              <nav className="grid gap-6 text-lg font-medium">
-                <Link
-                  href="#"
-                  className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-                >
-                  <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-                  <span className="sr-only">Acme Inc</span>
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <Home className="h-5 w-5" />
-                  Dashboard
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-foreground"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  Orders
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <Package className="h-5 w-5" />
-                  Products
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <Users2 className="h-5 w-5" />
-                  Customers
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <LineChart className="h-5 w-5" />
-                  Settings
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-          <Breadcrumb className="hidden md:flex">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="#">Dashboard</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="#">Orders</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              searchOrders     <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Recent Orders</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="relative ml-auto flex-1 md:grow-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-              onChange={(e) => searchOrders(e.target.value)}
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="overflow-hidden rounded-full"
-              >
-                <Image
-                  src="/placeholder-user.jpg"
-                  width={36}
-                  height={36}
-                  alt="Avatar"
-                  className="overflow-hidden rounded-full"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-          <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-              <Card className="sm:col-span-2">
-                <CardHeader className="pb-3">
-                  <CardTitle>Your Orders</CardTitle>
-                  <CardDescription className="max-w-lg text-balance leading-relaxed">
-                    Introducing Our Dynamic Orders Dashboard for Seamless Management and Insightful Analysis.
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button>Create New Order</Button>
-                </CardFooter>
-              </Card>
-             <Card>
-  <CardHeader className="pb-2">
-    <CardDescription>This Week</CardDescription>
-    <CardTitle className="text-4xl">Ksh {weeklyEarnings}</CardTitle>
-    <CardDescription className="capitalize">
-      {Math.floor(weeklyEarningsIncrease)}% {weeklyEarningsIncrease > 0 ? "up" : "down"} from last week
-    </CardDescription>
-  </CardHeader>
-  <CardContent className="pb-1">
-    <Progress value={weeklyProgress} className="h-2" />
-  </CardContent>
-</Card>
-<Card>
-  <CardHeader className="pb-2">
-    <CardDescription>This Month</CardDescription>
-    <CardTitle className="text-4xl">Ksh {monthlyEarnings}</CardTitle>
-    <CardDescription className="capitalize">
-      {monthlyEarningsIncrease}% {monthlyEarningsIncrease > 0 ? "up" : "down"} from last month
-    </CardDescription>
-  </CardHeader>
-  <CardContent className="pb-1">
-    <Progress value={monthlyProgress} className="h-2" />
-  </CardContent>
-</Card>
-
+        {/* Header */}
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 sm:static sm:h-auto sm:border-0 sm:px-6">
+          <h1 className="text-xl font-semibold">Orders</h1>
+          <div className="ml-auto flex items-center gap-2">
+            <div className="relative">
+              <MagnifyingGlass className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search orders..."
+                className="w-[200px] pl-8"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+              />
             </div>
-            <Card>
-              <CardHeader className="border-b p-4">
-                <CardTitle className="text-2xl">Orders</CardTitle>
-              </CardHeader>
-              <Tabs defaultValue="week" onValueChange={setFilter}>
-                <TabsList className="p-2">
-                  <TabsTrigger value="week">This Week</TabsTrigger>
-                  <TabsTrigger value="month">This Month</TabsTrigger>
-                  <TabsTrigger value="year">This Year</TabsTrigger>
-                </TabsList>
-                <TabsContent value="week" className="mt-0 p-0">
-                  <OrderList filter="week" />
-                </TabsContent>
-                <TabsContent value="month" className="mt-0 p-0">
-                  <OrderList filter="month" />
-                </TabsContent>
-                <TabsContent value="year" className="mt-0 p-0">
-                  <OrderList filter="year" />
-
-                </TabsContent>
-              </Tabs>
-            </Card>
+            <Select value={statusFilter || 'all'} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px]">
+                <FunnelSimple className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Orders</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+            <ThemeToggle />
           </div>
-          <SingleOrder/>
+        </header>
+
+        <main className="flex-1 p-4 sm:px-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Orders</CardTitle>
+              <CardDescription>
+                Manage and track customer orders
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="h-16 animate-pulse bg-muted rounded" />
+                  ))}
+                </div>
+              ) : orders?.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">
+                          #{order.id?.slice(-6).toUpperCase()}
+                        </TableCell>
+                        <TableCell>
+                          {order.customer_name || order.user?.display_name || 'Guest'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(order.status)}>
+                            {order.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(order.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(order.total_amount)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/orders/${order.id}`}>
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <EmptyState
+                  type="orders"
+                  title="No orders yet"
+                  description="When customers purchase your products, orders will appear here"
+                />
+              )}
+            </CardContent>
+          </Card>
         </main>
       </div>
     </div>
-  );
+  )
 }
+
 export default withAuth(OrdersPage)

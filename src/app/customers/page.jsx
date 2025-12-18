@@ -2,26 +2,23 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { 
-  ChevronLeft,
-  ChevronRight,
+import {
+  CaretLeft,
+  CaretRight,
+  ChartLine,
   Copy,
-  Home,
-  LineChart,
-  ListFilter,
-  MoreVertical,
+  FunnelSimple,
+  Gear,
+  House,
+  MagnifyingGlass,
   Package,
-  Package2,
-  PanelLeft,
-  Search,
-  Settings,
   ShoppingCart,
-  Truck,
-  Users2,
-} from "lucide-react"
+  SidebarSimple,
+  UsersThree,
+} from "phosphor-react"
 
 import { Badge } from "@/components/ui/badge"
-import { 
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -30,7 +27,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { 
+import {
   Card,
   CardContent,
   CardDescription,
@@ -38,7 +35,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -47,14 +44,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { 
+import {
   Pagination,
   PaginationContent,
   PaginationItem,
 } from "@/components/ui/pagination"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -62,13 +59,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { 
+import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { 
+import {
   TooltipProvider,
   Tooltip,
   TooltipContent,
@@ -79,7 +76,7 @@ import SingleAppointment from "../components/SingleAppointment"
 import AppointmentList from "../components/AppointmentList"
 import SideNav from "../components/SideNav"
 import { useContext, useState } from "react"
-import { UserContext } from "../context/UserContext"
+import { UserContext } from "@/context/UserContext"
 import withAuth from "@/hoc/WithAuth"
 
 function AppointmentsPage() {
@@ -89,13 +86,13 @@ function AppointmentsPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       {/* THIS IS THE SIDENAV */}
-      <SideNav/>
+      <SideNav />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="sm:hidden">
-                <PanelLeft className="h-5 w-5" />
+                <SidebarSimple className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
@@ -105,14 +102,14 @@ function AppointmentsPage() {
                   href="#"
                   className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
                 >
-                  <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
+                  <Package className="h-5 w-5 transition-all group-hover:scale-110" />
                   <span className="sr-only">Acme Inc</span>
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <Home className="h-5 w-5" />
+                  <House className="h-5 w-5" />
                   Dashboard
                 </Link>
                 <Link
@@ -133,14 +130,14 @@ function AppointmentsPage() {
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <Users2 className="h-5 w-5" />
+                  <UsersThree className="h-5 w-5" />
                   Customers
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <LineChart className="h-5 w-5" />
+                  <ChartLine className="h-5 w-5" />
                   Settings
                 </Link>
               </nav>
@@ -166,7 +163,7 @@ function AppointmentsPage() {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="relative ml-auto flex-1 md:grow-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search..."
@@ -237,7 +234,7 @@ function AppointmentsPage() {
               </Tabs>
             </Card>
           </div>
-          <SingleAppointment/>
+          <SingleAppointment />
         </main>
       </div>
     </div>

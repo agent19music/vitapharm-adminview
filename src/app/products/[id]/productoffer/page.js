@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect, useContext } from 'react';
 import { isAfter, isBefore } from 'date-fns';
 import SideNav from '@/app/components/SideNav';
-import { ProductContext } from '@/app/context/ProductContext';
+import { ProductContext } from '@/context/ProductContext';
 import { DatePickerWithRange } from '@/app/components/Productoffer/DateRange';
 import { toast, Toaster } from 'react-hot-toast';
 import AdminPfp from '@/app/components/AdminPfp';
@@ -21,20 +21,13 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link"
 import {
-  File,
-  Home,
-  LineChart,
-  ListFilter,
-  MoreHorizontal,
+  ChartLine,
+  House,
   Package,
-  Package2,
-  PanelLeft,
-  PlusCircle,
-  Search,
-  Settings,
   ShoppingCart,
-  Users2,
-} from "lucide-react"
+  SidebarSimple,
+  UsersThree,
+} from "phosphor-react"
 import withAuth from '@/hoc/WithAuth';
 
 function ProductOffer({ params }) {
@@ -79,14 +72,14 @@ function ProductOffer({ params }) {
   }, [date, setValue]);
 
   console.log(date);
-  
+
 
   function formatDate(dateString) {
     const date = new Date(dateString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed in JavaScript
     const day = String(date.getDate()).padStart(2, '0');
-  
+
     return `${year}-${month}-${day}`;
   }
 
@@ -107,10 +100,10 @@ function ProductOffer({ params }) {
       deal_start_time: formatDate(data.offerStartDate),
       deal_end_time: formatDate(data.offerEndDate),
     };
-  
+
     // Log the data
     console.log(payload);
-  
+
     try {
       const response = await fetch(`${apiEndpoint}/products/${product.id}`, {
         method: 'PATCH',
@@ -119,11 +112,11 @@ function ProductOffer({ params }) {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to submit offer');
       }
-  
+
       toast.success('Offer submitted successfully!', {
         style: {
           background: '#4ade80',
@@ -140,16 +133,16 @@ function ProductOffer({ params }) {
       });
     }
   };
-  
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <SideNav />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="sm:hidden">
-                <PanelLeft className="h-5 w-5" />
+                <SidebarSimple className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
@@ -159,14 +152,14 @@ function ProductOffer({ params }) {
                   href="#"
                   className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
                 >
-                  <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
+                  <Package className="h-5 w-5 transition-all group-hover:scale-110" />
                   <span className="sr-only">Acme Inc</span>
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <Home className="h-5 w-5" />
+                  <House className="h-5 w-5" />
                   Dashboard
                 </Link>
                 <Link
@@ -187,14 +180,14 @@ function ProductOffer({ params }) {
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <Users2 className="h-5 w-5" />
+                  <UsersThree className="h-5 w-5" />
                   Customers
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <LineChart className="h-5 w-5" />
+                  <ChartLine className="h-5 w-5" />
                   Settings
                 </Link>
               </nav>
@@ -220,16 +213,16 @@ function ProductOffer({ params }) {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="relative ml-auto flex-1 md:grow-0">
-           
+
           </div>
-         <AdminPfp/>
+          <AdminPfp />
         </header>
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
             Product Offer
           </h1>
         </header>
-        <Toaster/>
+        <Toaster />
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 mt-12">
           {isLoading ? (
             <p>Loading...</p>
@@ -242,12 +235,12 @@ function ProductOffer({ params }) {
                   <div className="grid gap-3">
                     <label htmlFor="offerPrice">Offer Price</label>
                     <input
-                  id="offerPrice"
-                  type="number"
-                  {...register('offerPrice', { valueAsNumber: true })}
-                  placeholder="Offer Price"
-                  className="w-full p-2 border rounded"
-                />
+                      id="offerPrice"
+                      type="number"
+                      {...register('offerPrice', { valueAsNumber: true })}
+                      placeholder="Offer Price"
+                      className="w-full p-2 border rounded"
+                    />
 
                     {errors.offerPrice && <span className="text-red-500">{errors.offerPrice.message}</span>}
                   </div>

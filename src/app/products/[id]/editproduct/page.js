@@ -2,19 +2,16 @@
 import Image from "next/image"
 import Link from "next/link"
 import {
-  ChevronLeft,
-  Home,
-  LineChart,
+  ChartLine,
+  Gear,
+  House,
+  MagnifyingGlass,
   Package,
-  Package2,
-  PanelLeft,
   PlusCircle,
-  Search,
-  Settings,
   ShoppingCart,
-  Upload,
-  Users2,
-} from "lucide-react"
+  SidebarSimple,
+  UsersThree,
+} from "phosphor-react"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -62,64 +59,64 @@ import PhotoCard from "@/app/components/editproduct/PhotoCard";
 import CategoryToggle from "@/app/components/editproduct/CategoryToggle";
 import VariantHandle from "@/app/components/editproduct/VariantHandle";
 import { useContext } from "react";
-import { UserContext } from "@/app/context/UserContext";
-import { ProductContext } from "@/app/context/ProductContext";
+import { UserContext } from "@/context/UserContext";
+import { ProductContext } from "@/context/ProductContext";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from 'react-hot-toast';
 import AdminPfp from "@/app/components/AdminPfp";
 import withAuth from "@/hoc/WithAuth";
 
-function Editproduct({params}) {
-  const {apiEndpoint} = useContext(UserContext)
-  const {setName, name, setDescription, description, updateProduct} = useContext(ProductContext)
+function Editproduct({ params }) {
+  const { apiEndpoint } = useContext(UserContext)
+  const { setName, name, setDescription, description, updateProduct } = useContext(ProductContext)
 
   const router = useRouter();
   function stripInt(obj) {
     return parseInt(obj.editproduct, 10);
-}
-  
+  }
+
   const [product, setProduct] = useState([])
   const [isLoading, setIsLoading] = useState(false);
-console.log(params.id);
+  console.log(params.id);
 
-useEffect(() => {
-  setIsLoading(true);
-  fetch(`${apiEndpoint}/products/${params.id}`)
-    .then(response => response.json())
-    .then(data => {
-      setProduct(data);
-     
-      setIsLoading(false);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      setIsLoading(false);
-    });
-}, [params, apiEndpoint]);
+  useEffect(() => {
+    setIsLoading(true);
+    fetch(`${apiEndpoint}/products/${params.id}`)
+      .then(response => response.json())
+      .then(data => {
+        setProduct(data);
 
-useEffect(() => {
-  if (product.name) {
-    setName(product.name);
-  }
-  if (product.description) {
-    setDescription(product.description);
-  }
-}, [product, setDescription, setName]);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        setIsLoading(false);
+      });
+  }, [params, apiEndpoint]);
+
+  useEffect(() => {
+    if (product.name) {
+      setName(product.name);
+    }
+    if (product.description) {
+      setDescription(product.description);
+    }
+  }, [product, setDescription, setName]);
 
 
   console.log(product);
 
-  
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <SideNav />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Toaster/>
+          <Toaster />
           <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="sm:hidden">
-                <PanelLeft className="h-5 w-5" />
+                <SidebarSimple className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
@@ -129,14 +126,14 @@ useEffect(() => {
                   href="#"
                   className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
                 >
-                  <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
+                  <Package className="h-5 w-5 transition-all group-hover:scale-110" />
                   <span className="sr-only">Acme Inc</span>
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <Home className="h-5 w-5" />
+                  <House className="h-5 w-5" />
                   Dashboard
                 </Link>
                 <Link
@@ -157,14 +154,14 @@ useEffect(() => {
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <Users2 className="h-5 w-5" />
+                  <UsersThree className="h-5 w-5" />
                   Customers
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <LineChart className="h-5 w-5" />
+                  <ChartLine className="h-5 w-5" />
                   Settings
                 </Link>
               </nav>
@@ -197,7 +194,7 @@ useEffect(() => {
               className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
             /> */}
           </div>
-        <AdminPfp/>
+          <AdminPfp />
         </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
@@ -207,7 +204,7 @@ useEffect(() => {
                 <span className="sr-only">Back</span>
               </Button>
               <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-               {product.name} 
+                {product.name}
               </h1>
               <Badge variant="outline" className="ml-auto sm:ml-0">
                 In stock
@@ -216,7 +213,7 @@ useEffect(() => {
                 <Button variant="outline" size="sm">
                   Discard
                 </Button>
-                <Button onClick={()=>updateProduct(product.id)} size="sm">Save Product</Button>
+                <Button onClick={() => updateProduct(product.id)} size="sm">Save Product</Button>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
@@ -229,33 +226,33 @@ useEffect(() => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-  <div className="grid gap-6">
-    <div className="grid gap-3">
-      <Label htmlFor="name">Name</Label>
-      <Input
-        id="name"
-        type="text"
-        className="w-full"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-    </div>
-    <div className="grid gap-3">
-      <Label htmlFor="description">Description</Label>
-      <Textarea
-        id="description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        className="min-h-32"
-      />
-    </div>
-  </div>
-</CardContent>
+                    <div className="grid gap-6">
+                      <div className="grid gap-3">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                          id="name"
+                          type="text"
+                          className="w-full"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                          id="description"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          className="min-h-32"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
                 </Card>
-                <VariantHandle product={product}/>              
-                
-                <CategoryToggle product={product}/>
-                
+                <VariantHandle product={product} />
+
+                <CategoryToggle product={product} />
+
               </div>
               <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
                 <Card x-chunk="dashboard-07-chunk-3">
@@ -282,7 +279,7 @@ useEffect(() => {
                 </Card>
 
                 {/* PHOTOCARD GOES HERE */}
-               <PhotoCard product={product}/>
+                <PhotoCard product={product} />
 
                 <Card x-chunk="dashboard-07-chunk-5">
                   <CardHeader>

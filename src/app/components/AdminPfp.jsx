@@ -11,7 +11,7 @@ import {
   } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
-import { UserContext } from '../context/UserContext'  
+import { UserContext } from '@/context/UserContext'  
 import {
   AlertDialog,
   AlertDialogAction,

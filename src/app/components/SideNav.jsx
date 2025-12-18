@@ -1,3 +1,4 @@
+"use client"
 import { usePathname } from 'next/navigation';
 import {
   TooltipProvider,
@@ -6,34 +7,33 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import Link from 'next/link';
-import { Package2, Home, ShoppingCart, Package, Users2, LineChart, Settings, Percent } from 'lucide-react';
+import { ChartBar, Gear, House, Package, Percent, ShoppingCart, Star, Wallet } from "phosphor-react";
 
 export default function SideNav() {
-  
+
   const currentPath = usePathname();
 
   const getLinkClasses = (path) =>
-    `flex h-9 w-9 items-center justify-center rounded-lg ${
-      currentPath === path
-        ? 'bg-accent text-accent-foreground'
-        : 'text-muted-foreground hover:text-foreground'
+    `flex h-9 w-9 items-center justify-center rounded-lg ${currentPath === path
+      ? 'bg-accent text-accent-foreground'
+      : 'text-muted-foreground hover:text-foreground'
     } transition-colors md:h-8 md:w-8`;
 
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
         <Link
-          href="#"
+          href="/dashboard"
           className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
         >
-          <Package2 className="h-4 w-4 transition-all group-hover:scale-110" />
-          <span className="sr-only">Acme Inc</span>
+          <Package className="h-4 w-4 transition-all group-hover:scale-110" />
+          <span className="sr-only">CampoSocial</span>
         </Link>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Link href="/dashboard" className={getLinkClasses('/dashboard')}>
-                <Home className="h-5 w-5" />
+                <House className="h-5 w-5" />
                 <span className="sr-only">Dashboard</span>
               </Link>
             </TooltipTrigger>
@@ -65,34 +65,45 @@ export default function SideNav() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link href="/customers" className={getLinkClasses('/customers')}>
-                <Users2 className="h-5 w-5" />
-                <span className="sr-only">Customers</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Customers</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/promocode" className={getLinkClasses('/promocode')}>
-                <Percent className="h-5 w-5" />
-                <span className="sr-only">Promocode</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Promocode</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/analytics" className={getLinkClasses('/analytics')}>
-                <LineChart className="h-5 w-5" />
-                <span className="sr-only">Analytics</span>
+              <Link href="/stats" className={getLinkClasses('/stats')}>
+                <ChartBar className="h-5 w-5" />
+                <span className="sr-only">Stats</span>
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">Analytics</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/reviews" className={getLinkClasses('/reviews')}>
+                <Star className="h-5 w-5" />
+                <span className="sr-only">Reviews</span>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">Reviews</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/discounts" className={getLinkClasses('/discounts')}>
+                <Percent className="h-5 w-5" />
+                <span className="sr-only">Discounts</span>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">Discounts</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/payouts" className={getLinkClasses('/payouts')}>
+                <Wallet className="h-5 w-5" />
+                <span className="sr-only">Payouts</span>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">Payouts</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </nav>
@@ -101,7 +112,7 @@ export default function SideNav() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link href="/settings" className={getLinkClasses('/settings')}>
-                <Settings className="h-5 w-5" />
+                <Gear className="h-5 w-5" />
                 <span className="sr-only">Settings</span>
               </Link>
             </TooltipTrigger>

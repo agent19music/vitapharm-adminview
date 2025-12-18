@@ -8,8 +8,8 @@ import { toast, Toaster } from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import SideNav from '../components/SideNav';
-import { ProductContext } from '@/app/context/ProductContext';
-import {usePathname} from 'next/navigation'
+import { ProductContext } from '@/context/ProductContext';
+import { usePathname } from 'next/navigation'
 
 const PromoCodeForm = () => {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
@@ -73,7 +73,7 @@ const PromoCodeForm = () => {
 
   return (
     <div className="flex min-h-screen">
-      <SideNav  />
+      <SideNav />
       <div className="flex flex-col items-center justify-center w-full p-6">
         <Toaster />
         <div className="w-full max-w-lg">
