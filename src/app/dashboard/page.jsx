@@ -9,27 +9,45 @@ import {
   Star,
   TrendUp,
   ArrowUpRight,
-  List
+  List,
+  Plus,
+  Percent,
+  Cube
 } from "phosphor-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Toaster } from "react-hot-toast"
 
 import SideNav from "../components/SideNav"
 import EmptyState from "../components/EmptyState"
 import { RevenueChart } from "../components/SalesChart"
 import { ThemeToggle } from "../components/ThemeToggle"
+import { AddProductModal } from "../components/modals/AddProductModal"
+import { EditProductModal } from "../components/modals/EditProductModal"
+import { StockModal } from "../components/modals/StockModal"
+import { DiscountModal } from "../components/modals/DiscountModal"
 import withAuth from "@/hoc/WithAuth"
 import { UserContext } from "../../context/UserContext"
+import { ProductContext } from "../../context/ProductContext"
 
 function Dashboard() {
   const { authToken, sellerProfile } = useContext(UserContext)
+  const { products, fetchProducts, fetchDiscounts } = useContext(ProductContext)
+
   const [dashboardData, setDashboardData] = useState(null)
   const [salesData, setSalesData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [period, setPeriod] = useState('30d')
+
+  // Modal states
+  const [addProductOpen, setAddProductOpen] = useState(false)
+  const [editProductOpen, setEditProductOpen] = useState(false)
+  const [stockModalOpen, setStockModalOpen] = useState(false)
+  const [discountModalOpen, setDiscountModalOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState(null)
 
   const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT
 
@@ -98,12 +116,52 @@ function Dashboard() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <SideNav />
+      <Toaster />
+
+      {/* Modals */}
+      <AddProductModal
+        open={addProductOpen}
+        onOpenChange={setAddProductOpen}
+        onSuccess={() => fetchProducts()}
+      />
+      <EditProductModal
+        open={editProductOpen}
+        onOpenChange={setEditProductOpen}
+        product={selectedProduct}
+        onSuccess={() => fetchProducts()}
+      />
+      <StockModal
+        open={stockModalOpen}
+        onOpenChange={setStockModalOpen}
+        product={selectedProduct}
+        onSuccess={() => fetchProducts()}
+      />
+      <DiscountModal
+        open={discountModalOpen}
+        onOpenChange={setDiscountModalOpen}
+        onSuccess={() => fetchDiscounts()}
+      />
 
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         {/* Header */}
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 sm:static sm:h-auto sm:border-0 sm:px-6">
           <h1 className="text-xl font-semibold">Dashboard</h1>
           <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDiscountModalOpen(true)}
+            >
+              <Percent className="h-4 w-4 mr-1" />
+              Create Discount
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setAddProductOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add Product
+            </Button>
             <ThemeToggle />
           </div>
         </header>

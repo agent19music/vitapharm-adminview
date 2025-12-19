@@ -1,72 +1,172 @@
-import { useState, useContext } from 'react';
+"use client"
+
+import { useState, useContext, useRef } from 'react';
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { UploadSimple, X } from "phosphor-react"
+import { UploadSimple, Trash, Plus } from "phosphor-react"
 import { ProductContext } from '@/context/ProductContext';
 
-export default function PhotoCard({ product }) {
+export default function PhotoCard({ product, onNewImages }) {
   const { selectedImages, setSelectedImages } = useContext(ProductContext)
+  const inputRef = useRef(null)
+  const [dragActive, setDragActive] = useState(false)
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImages(oldImages => [...oldImages, reader.result]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  // Get the image URL - handle both string and object formats
+  const getImageUrl = (image) => {
+    if (!image) return null
+    if (typeof image === 'string') return image
+    return image.url || image.image_url
+  }
 
-  const removeSelectedImage = (index) => {
-    setSelectedImages(oldImages => oldImages.filter((_, i) => i !== index));
-  };
+  const handleFiles = (files) => {
+    const validFiles = Array.from(files).filter(
+      file => file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024
+    )
+
+    if (validFiles.length > 0) {
+      // Store actual File objects for upload
+      setSelectedImages(prev => [...(prev || []), ...validFiles])
+
+      // Notify parent if callback provided
+      if (onNewImages) {
+        onNewImages(validFiles)
+      }
+    }
+  }
+
+  const handleDrag = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    if (e.dataTransfer.files) {
+      handleFiles(e.dataTransfer.files)
+    }
+  }
+
+  const handleChange = (e) => {
+    if (e.target.files) {
+      handleFiles(e.target.files)
+    }
+  }
+
+  const removeNewImage = (index) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Get preview for File or existing image
+  const getPreviewUrl = (item) => {
+    if (item instanceof File) {
+      return URL.createObjectURL(item)
+    }
+    return getImageUrl(item)
+  }
+
+  const existingImages = product?.images || []
+  const newImages = selectedImages || []
+  const totalImages = existingImages.length + newImages.length
 
   return (
-    <Card className="overflow-hidden" x-chunk="dashboard-07-chunk-4">
-      <CardContent>
-        <div className="grid gap-2">
-          {product.images && product.images.map((image, index) => (
-            <button key={index}>
-              <Image
-                alt={`Product image ${index + 1}`}
-                className="aspect-square w-full rounded-md object-cover"
-                height="720"
-                src={`${image.url}`}
-                width="480"
-              />
-            </button>
-          ))}
-          <hr />
-          {selectedImages && selectedImages.map((image, index) => (
-            <div key={index} className="relative">
-              <button onClick={() => removeSelectedImage(index)} className="absolute top-0 right-0 p-1 bg-white text-red-500">
-                <X className="h-4 w-4" />
-              </button>
-
-              <Image
-                alt={`Selected image ${index + 1}`}
-                className="aspect-square w-full rounded-md object-cover"
-                height="720"
-                src={image}
-                width="480"
-              />
+    <Card>
+      <CardHeader>
+        <CardTitle>Product Images</CardTitle>
+        <CardDescription>
+          {totalImages} image{totalImages !== 1 ? 's' : ''} • Max 10
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Existing Images */}
+        {existingImages.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground font-medium">Current Images</p>
+            <div className="grid grid-cols-2 gap-2">
+              {existingImages.map((image, index) => (
+                <div key={`existing-${index}`} className="relative aspect-square rounded-md overflow-hidden bg-muted">
+                  <Image
+                    alt={`Product image ${index + 1}`}
+                    className="object-cover"
+                    fill
+                    src={getImageUrl(image)}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-          <button className="relative flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
-            <UploadSimple className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
+
+        {/* New Images to Upload */}
+        {newImages.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground font-medium">New Images (will upload on save)</p>
+            <div className="grid grid-cols-2 gap-2">
+              {newImages.map((image, index) => (
+                <div key={`new-${index}`} className="relative aspect-square rounded-md overflow-hidden bg-muted group">
+                  <Image
+                    alt={`New image ${index + 1}`}
+                    className="object-cover"
+                    fill
+                    src={getPreviewUrl(image)}
+                    unoptimized={image instanceof File}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeNewImage(index)}
+                    className="absolute top-1 right-1 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Upload Area */}
+        {totalImages < 10 && (
+          <div
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            className={`relative flex aspect-video items-center justify-center rounded-md border-2 border-dashed transition-colors cursor-pointer ${dragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+              }`}
+            onClick={() => inputRef.current?.click()}
+          >
             <input
+              ref={inputRef}
               type="file"
               accept="image/*"
               multiple
-              onChange={handleFileChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
+              onChange={handleChange}
+              className="hidden"
             />
-          </button>
-        </div>
+            <div className="flex flex-col items-center gap-1 text-center p-4">
+              <UploadSimple className="h-6 w-6 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                Click or drag to upload
+              </span>
+              <span className="text-xs text-muted-foreground/60">
+                PNG, JPG up to 5MB
+              </span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

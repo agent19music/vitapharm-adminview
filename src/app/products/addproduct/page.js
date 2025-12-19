@@ -1,58 +1,16 @@
-"use client";
-import * as z from "zod";
-import { useForm, useFieldArray } from "react-hook-form";
-import Image from "next/image"
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Import Textarea from your UI library
-import { Button } from "@/components/ui/button";
-import Link from "next/link"
-import {
-  SelectValue,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  Select,
-} from "@/components/ui/select";
-import { useState } from "react"; // Import useState
-import {
-  TooltipProvider,  
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+"use client"
 
+import { useContext, useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { toast, Toaster } from "react-hot-toast"
 import {
   CaretLeft,
-  ChartLine,
-  Gear,
-  House,
-  MagnifyingGlass,
   Package,
-  PlusCircle,
-  ShoppingCart,
-  SidebarSimple,
-  UploadSimple,
-  UsersThree,
-  X,
+  FloppyDisk,
+  House
 } from "phosphor-react"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -61,188 +19,174 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import SideNav from "@/app/components/SideNav";
-import withAuth from "@/hoc/WithAuth";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
+import SideNav from "@/app/components/SideNav"
+import { ThemeToggle } from "@/app/components/ThemeToggle"
+import { CategorySearch } from "@/components/ui/category-search"
+import { ImageUploader } from "@/components/ui/image-uploader"
+import { VariantEditor } from "@/components/ui/variant-editor"
 
-
-
-const formSchema = z
-  .object({
-    name: z.string(),
-    description: z.string(),
-    category: z.string(),
-    subCategory: z.string(),
-    brand: z.string(),
-    variations: z.array(z.object({
-      size: z.string(),
-      price: z.number(),
-    })),
-    images: z
-      .array(z.instanceof(File))
-      .refine(
-        (files) =>
-          files.every(
-            (file) =>
-              file.size <= MAX_FILE_SIZE &&
-              ACCEPTED_IMAGE_TYPES.includes(file.type)
-          ),
-        {
-          message:
-            "Item photo: Only .jpeg, .jpg, .png files of 2MB or less are accepted",
-        }
-      ),
-  });
-
-
+import withAuth from "@/hoc/WithAuth"
+import { UserContext } from "@/context/UserContext"
+import { ProductContext } from "@/context/ProductContext"
 
 function AddProduct() {
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      category: "",
-      subCategory: "",
-      brand: "",
-      variations: [],
-      images: [],
-    },
-  });
+  const router = useRouter()
+  const { authToken } = useContext(UserContext)
+  const { fetchProducts } = useContext(ProductContext)
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "variations",
-  });
+  const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:5001/camposocial/api'
 
-  const [selectedImages, setSelectedImages] = useState([]); // State to manage selected images
+  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    price: "",
+    brand: "",
+    category: ""
+  })
+  const [images, setImages] = useState([])
+  const [variants, setVariants] = useState([])
+  const [imageVariantLinks, setImageVariantLinks] = useState({})
 
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setSelectedImages(files);
-    form.setValue("images", files); // Update form value for images
-  };
-  
-  const removeImage = (index) => {
-    const newImages = [...selectedImages];
-    newImages.splice(index, 1);
-    setSelectedImages(newImages);
-    form.setValue("images", newImages); // Update form value for images
-  };
+  // Validation state for showing inline errors
+  const [errors, setErrors] = useState({})
 
-  const handleSubmit = async (values) => {
-    const formData = new FormData();
-    formData.append('admin_id', 1);
-    
-    // Create a copy of values and change subCategory to sub_category
-    const adjustedValues = { ...values, sub_category: values.subCategory };
-    delete adjustedValues.subCategory;
-  
-    Object.keys(adjustedValues).forEach((key) => {
-      if (key === 'images') {
-        selectedImages.forEach((file) => {
-          formData.append(key, file);
-        });
-      } else {
-        formData.append(key, JSON.stringify(adjustedValues[key]));
+  // Check if variants have prices defined
+  const variantsHavePrices = variants.length > 0 && variants.every(v => v.price && parseFloat(v.price) > 0)
+
+  // Price is required only if no variants OR variants don't have prices
+  const isPriceRequired = variants.length === 0 || !variantsHavePrices
+
+  const validateForm = () => {
+    const newErrors = {}
+
+    // Title is required
+    if (!formData.title.trim()) {
+      newErrors.title = "Product title is required"
+    }
+
+    // Price is required only if no variants with prices
+    if (isPriceRequired) {
+      const price = parseFloat(formData.price)
+      if (!formData.price || isNaN(price) || price <= 0) {
+        newErrors.price = "Valid price is required (must be greater than 0)"
       }
-    });
-  
-    // Log form data
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
     }
-  
-    const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT;
-    
-    if (!apiEndpoint) {
-      console.error('API endpoint not configured');
-      return;
-    }
-  
-    // Call your API endpoint
-    const response = await fetch(`${apiEndpoint}/api/vitapharm/products`, {
-      method: 'POST',
-      body: formData,
-    });
-  
-    if (response.ok) {
-      console.log('Product added successfully');
-    } else {
-      console.error('Failed to add product');
-    }
-  };
-  
 
-   
+    // At least one image is required
+    if (images.length === 0) {
+      newErrors.images = "At least one product image is required"
+    }
+
+    setErrors(newErrors)
+    return newErrors
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    // Run validation
+    const validationErrors = validateForm()
+    if (Object.keys(validationErrors).length > 0) {
+      // Show toast for the first error
+      if (validationErrors.title) toast.error(validationErrors.title)
+      else if (validationErrors.price) toast.error(validationErrors.price)
+      else if (validationErrors.images) toast.error(validationErrors.images)
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // Build FormData for multipart upload
+      const submitData = new FormData()
+      submitData.append('title', formData.title)
+      submitData.append('description', formData.description || '')
+
+      // Only include price if required (no variants with prices)
+      if (isPriceRequired || formData.price) {
+        submitData.append('price', formData.price || '0')
+      }
+
+      submitData.append('brand', formData.brand || '')
+      submitData.append('category', formData.category || '')
+
+      // Add variations as JSON string
+      if (variants.length > 0) {
+        submitData.append('variations', JSON.stringify(variants.map(v => ({
+          name: v.name,
+          value: v.value,
+          price: v.price,
+          stock: v.stock
+        }))))
+      }
+
+      // Add images
+      images.forEach((image) => {
+        if (image instanceof File) {
+          submitData.append('images', image)
+        }
+      })
+
+      const response = await fetch(`${apiEndpoint}/seller/products`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: submitData
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create product')
+      }
+
+      toast.success("Product created successfully!")
+
+      // Refresh products list
+      if (fetchProducts) {
+        fetchProducts()
+      }
+
+      // Navigate to products list
+      setTimeout(() => {
+        router.push('/products')
+      }, 1000)
+
+    } catch (error) {
+      console.error('Error creating product:', error)
+      toast.error(error.message || "Failed to create product")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleImageVariantLink = (imageIndex, variantId) => {
+    setImageVariantLinks(prev => ({
+      ...prev,
+      [imageIndex]: variantId
+    }))
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-     <SideNav/>
+      <SideNav />
+      <Toaster />
+
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="sm:hidden">
-                <SidebarSimple className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-xs">
-              <nav className="grid gap-6 text-lg font-medium">
-                <Link
-                  href="#"
-                  className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-                >
-                  <Package className="h-5 w-5 transition-all group-hover:scale-110" />
-                  <span className="sr-only">Acme Inc</span>
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <House className="h-5 w-5" />
-                  Dashboard
-                </Link>
-                <Link
-                  href="/orders"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  Orders
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-foreground"
-                >
-                  <Package className="h-5 w-5" />
-                  Products
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <UsersThree className="h-5 w-5" />
-                  Customers
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <ChartLine className="h-5 w-5" />
-                  Settings
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
+        {/* Header */}
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Breadcrumb className="hidden md:flex">
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="#">Dashboard</Link>
+                  <Link href="/dashboard">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -253,241 +197,235 @@ function AddProduct() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Add Products</BreadcrumbPage>
+                <BreadcrumbPage>Add Product</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <div className="relative ml-auto flex-1 md:grow-0">
-            {/* <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-            /> */}
+          <div className="ml-auto flex items-center gap-2">
+            <ThemeToggle />
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="overflow-hidden rounded-full"
-              >
-                <Image
-                  src="/placeholder-user.jpg"
-                  width={36}
-                  height={36}
-                  alt="Avatar"
-                  className="overflow-hidden rounded-full"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
-           
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </header>
-        </div>
-       
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="max-w-md w-full flex flex-col gap-4"
-        >
-          <div className="flex flex-wrap -mx-3">
-            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="w-full md:w-1/2 px-3">
-              <FormField
-                control={form.control}
-                name="brand"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Brand</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Brand" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-          <div className="flex flex-wrap -mx-3">
-            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="face">Face</SelectItem>
-                        <SelectItem value="eyes">Eyes</SelectItem>
-                        <SelectItem value="body">Body</SelectItem>
-                        <SelectItem value="skin">Skin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="w-full md:w-1/2 px-3">
-              <FormField
-                control={form.control}
-                name="subCategory"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sub-category</FormLabel>
-                    <Select onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a sub-category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="lipstick">Lipstick</SelectItem>
-                        <SelectItem value="moisturizer">Moisturizer</SelectItem>
-                        <SelectItem value="cream">Cream</SelectItem>
-                        <SelectItem value="eyeliner">Eyeliner</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Description" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {fields.map((item, index) => (
-            <div key={item.id}>
-              <div className="flex flex-wrap -mx-3">
-                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                  <FormField
-                    control={form.control}
-                    name={`variations.${index}.size`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Size</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Size" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="w-full md:w-1/2 px-3">
-                <FormField
-                    control={form.control}
-                    name={`variations.${index}.price`}
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Price</FormLabel>
-                        <FormControl>
-                            <Input 
-                            placeholder="Price" 
-                            {...field} 
-                            onChange={e => {
-                                field.onChange(parseFloat(e.target.value));
-                            }}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
 
-                </div>
+        {/* Main Content */}
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 md:gap-8">
+          <div className="mx-auto w-full max-w-4xl">
+            {/* Page Title */}
+            <div className="flex items-center gap-4 mb-6">
+              <Button variant="outline" size="icon" className="h-7 w-7" asChild>
+                <Link href="/products">
+                  <CaretLeft className="h-4 w-4" />
+                  <span className="sr-only">Back</span>
+                </Link>
+              </Button>
+              <h1 className="flex-1 text-xl font-semibold tracking-tight">
+                Add New Product
+              </h1>
+              <div className="hidden items-center gap-2 md:flex">
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/products">Discard</Link>
+                </Button>
+                <Button size="sm" onClick={handleSubmit} disabled={isLoading}>
+                  <FloppyDisk className="h-4 w-4 mr-1" />
+                  {isLoading ? "Saving..." : "Save Product"}
+                </Button>
               </div>
-              <button type="button" onClick={() => remove(index)}>
-                Remove Variation
-              </button>
             </div>
-          ))}
-             <button type="button" onClick={() => append({ size: "", price: "" })}>
-            Add Variation
-          </button>
-           <div>
-                <h3 className="text-lg font-medium">Images</h3>
-                <input
-                  type="file"
-                  accept="image/jpeg, image/jpg, image/png"
-                  multiple
-                  onChange={handleImageChange}
-                />
-                {selectedImages.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="font-medium">Selected Images</h4>
-                    <ul className="list-disc list-inside">
-                      {selectedImages && selectedImages.map((file, index) => (
-                       <div  key={index} className="relative">
-                       <button onClick={() => removeImage(index)} className="absolute top-0 right-0 p-1 bg-white text-red-500">
-            <X className="h-4 w-4" />
-          </button>
-          
-                        <Image
-                          alt={`Selected image ${index + 1}`}
-                          className="aspect-square w-full rounded-md object-cover"
-                          height="720"
-                          src={file}
-                          width="480"
+
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-6 lg:grid-cols-3">
+                {/* Left Column - Main Details */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Basic Info Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Product Details</CardTitle>
+                      <CardDescription>
+                        Basic information about your product
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="title" className={errors.title ? 'text-red-500' : ''}>Product Title *</Label>
+                        <Input
+                          id="title"
+                          placeholder="Enter product name"
+                          value={formData.title}
+                          onChange={(e) => {
+                            setFormData({ ...formData, title: e.target.value })
+                            if (errors.title) setErrors(prev => ({ ...prev, title: null }))
+                          }}
+                          className={errors.title ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                          required
+                        />
+                        {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                          id="description"
+                          placeholder="Describe your product in detail..."
+                          className="min-h-32"
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         />
                       </div>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <FormMessage />
+                    </CardContent>
+                  </Card>
+
+                  {/* Images Card */}
+                  <Card className={errors.images ? 'border-red-500' : ''}>
+                    <CardHeader>
+                      <CardTitle className={errors.images ? 'text-red-500' : ''}>Product Images *</CardTitle>
+                      <CardDescription>
+                        Upload up to 10 images. At least one image is required.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ImageUploader
+                        images={images}
+                        onImagesChange={(newImages) => {
+                          setImages(newImages)
+                          if (errors.images && newImages.length > 0) {
+                            setErrors(prev => ({ ...prev, images: null }))
+                          }
+                        }}
+                        variants={variants}
+                        onImageVariantLink={handleImageVariantLink}
+                      />
+                      {errors.images && <p className="text-xs text-red-500 mt-2">{errors.images}</p>}
+                    </CardContent>
+                  </Card>
+
+                  {/* Variants Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Variants</CardTitle>
+                      <CardDescription>
+                        Add size, color, or other variations with different prices and stock levels
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <VariantEditor
+                        variants={variants}
+                        onChange={setVariants}
+                        basePrice={parseFloat(formData.price) || 0}
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Right Column - Meta Info */}
+                <div className="space-y-6">
+                  {/* Category & Brand Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Organization</CardTitle>
+                      <CardDescription>
+                        Categorize your product
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Category</Label>
+                        <CategorySearch
+                          value={formData.category}
+                          onChange={(val) => setFormData({ ...formData, category: val })}
+                          placeholder="Search category..."
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="brand">Brand</Label>
+                        <Input
+                          id="brand"
+                          placeholder="Enter brand name"
+                          value={formData.brand}
+                          onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Pricing Card - Only show if price is required */}
+                  {isPriceRequired ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Pricing</CardTitle>
+                        <CardDescription>
+                          Set base price for your product
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="price" className={errors.price ? 'text-red-500' : ''}>Base Price (KES) *</Label>
+                          <Input
+                            id="price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Enter price"
+                            value={formData.price}
+                            onChange={(e) => {
+                              setFormData({ ...formData, price: e.target.value })
+                              if (errors.price) setErrors(prev => ({ ...prev, price: null }))
+                            }}
+                            className={errors.price ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                          />
+                          {errors.price ? (
+                            <p className="text-xs text-red-500">{errors.price}</p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              {variants.length > 0
+                                ? "Set variant prices to hide this field"
+                                : "This is the selling price for your product"}
+                            </p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card className="border-green-500/50 bg-green-500/5">
+                      <CardHeader>
+                        <CardTitle className="text-green-700 dark:text-green-400">Pricing via Variants</CardTitle>
+                        <CardDescription>
+                          All your variants have prices set. The product will use variant-based pricing.
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  )}
+
+                  {/* Quick Tips Card */}
+                  <Card className="border-dashed">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm">Quick Tips</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground space-y-2">
+                      <p>• Use clear, descriptive titles</p>
+                      <p>• Add multiple images showing different angles</p>
+                      <p>• Include size guides in descriptions</p>
+                      <p>• Set accurate stock levels</p>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
 
-       
-         
-          <Button type="submit" className="w-full">
-            Submit
-          </Button>
-        </form>
-      </Form>
-    </main>
+              {/* Mobile Save Button */}
+              <div className="flex items-center justify-center gap-2 md:hidden mt-6">
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/products">Discard</Link>
+                </Button>
+                <Button type="submit" size="sm" disabled={isLoading}>
+                  <FloppyDisk className="h-4 w-4 mr-1" />
+                  {isLoading ? "Saving..." : "Save Product"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </main>
+      </div>
     </div>
-  );
+  )
 }
 
 export default withAuth(AddProduct)

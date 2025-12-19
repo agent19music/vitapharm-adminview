@@ -18,6 +18,11 @@ export default function ProductProvider({ children }) {
   const [variants, setVariants] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+
+  // Discount state
+  const [discounts, setDiscounts] = useState([]);
+  const [discountsLoading, setDiscountsLoading] = useState(false);
+
   let today = new Date()
   const sevenDaysFromToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
 
@@ -28,6 +33,8 @@ export default function ProductProvider({ children }) {
 
   const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:5001/camposocial/api';
   const { authToken } = useContext(UserContext);
+
+  // ==================== PRODUCTS ====================
 
   // Fetch seller's products from CampoSocial API
   const fetchProducts = useCallback(async () => {
@@ -54,6 +61,29 @@ export default function ProductProvider({ children }) {
       toast.error('Failed to load products');
     } finally {
       setIsLoading(false);
+    }
+  }, [authToken, apiEndpoint]);
+
+  // Fetch single product
+  const fetchProduct = useCallback(async (productId) => {
+    if (!authToken) return null;
+
+    try {
+      const response = await fetch(`${apiEndpoint}/seller/products/${productId}`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch product');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      return null;
     }
   }, [authToken, apiEndpoint]);
 
@@ -90,7 +120,7 @@ export default function ProductProvider({ children }) {
   // Delete product
   const deleteProduct = async (productId) => {
     try {
-      const response = await fetch(`${apiEndpoint}/products/${productId}`, {
+      const response = await fetch(`${apiEndpoint}/seller/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${authToken}`
@@ -112,7 +142,7 @@ export default function ProductProvider({ children }) {
     }
   };
 
-  // Update product
+  // Update product (legacy method for edit product page)
   const updateProduct = async (productId) => {
     setIsLoading(true);
 
@@ -126,7 +156,7 @@ export default function ProductProvider({ children }) {
         description: description,
       };
 
-      const response = await fetch(`${apiEndpoint}/products/${productId}`, {
+      const response = await fetch(`${apiEndpoint}/seller/products/${productId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -156,12 +186,12 @@ export default function ProductProvider({ children }) {
     }
   };
 
-  // Create new product
+  // Create new product (legacy method)
   const createProduct = async (productData) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${apiEndpoint}/products`, {
+      const response = await fetch(`${apiEndpoint}/seller/products`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,8 +221,219 @@ export default function ProductProvider({ children }) {
     }
   };
 
+  // Update stock for product variants
+  const updateStock = async (productId, variations) => {
+    try {
+      const response = await fetch(`${apiEndpoint}/seller/products/${productId}/stock`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ variations })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update stock');
+      }
+
+      // Refresh products to get updated stock
+      await fetchProducts();
+
+      toast.success('Stock updated successfully');
+      return true;
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      toast.error('Failed to update stock');
+      return false;
+    }
+  };
+
+  // Toggle product active status
+  const toggleProductActive = async (productId, isActive) => {
+    try {
+      const response = await fetch(`${apiEndpoint}/seller/products/${productId}/toggle`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_active: isActive })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle product status');
+      }
+
+      // Update local state
+      setProducts(prev => prev.map(p =>
+        p.id === productId ? { ...p, is_active: isActive } : p
+      ));
+      setFilteredProducts(prev => prev.map(p =>
+        p.id === productId ? { ...p, is_active: isActive } : p
+      ));
+
+      toast.success(`Product ${isActive ? 'activated' : 'deactivated'}`);
+      return true;
+    } catch (error) {
+      console.error('Error toggling product:', error);
+      toast.error('Failed to update product status');
+      return false;
+    }
+  };
+
+  // Update product status (draft, active, archived, sold_out)
+  const updateProductStatus = async (productId, status) => {
+    try {
+      const response = await fetch(`${apiEndpoint}/seller/products/${productId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update product status');
+      }
+
+      const data = await response.json();
+
+      // Update local state
+      setProducts(prev => prev.map(p =>
+        p.id === productId ? { ...p, status: data.status, is_active: data.is_active } : p
+      ));
+      setFilteredProducts(prev => prev.map(p =>
+        p.id === productId ? { ...p, status: data.status, is_active: data.is_active } : p
+      ));
+
+      toast.success(`Product status updated to "${status}"`);
+      return true;
+    } catch (error) {
+      console.error('Error updating product status:', error);
+      toast.error('Failed to update product status');
+      return false;
+    }
+  };
+
+  // ==================== DISCOUNTS ====================
+
+  // Fetch seller's discounts
+  const fetchDiscounts = useCallback(async () => {
+    if (!authToken) return;
+
+    setDiscountsLoading(true);
+    try {
+      const response = await fetch(`${apiEndpoint}/seller/discounts`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch discounts');
+      }
+
+      const data = await response.json();
+      setDiscounts(data.discounts || []);
+    } catch (error) {
+      console.error('Error fetching discounts:', error);
+    } finally {
+      setDiscountsLoading(false);
+    }
+  }, [authToken, apiEndpoint]);
+
+  // Create discount
+  const createDiscount = async (discountData) => {
+    try {
+      const response = await fetch(`${apiEndpoint}/seller/discounts`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(discountData)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create discount');
+      }
+
+      const data = await response.json();
+
+      // Refresh discounts list
+      await fetchDiscounts();
+
+      toast.success('Discount created successfully');
+      return data;
+    } catch (error) {
+      console.error('Error creating discount:', error);
+      toast.error(error.message || 'Failed to create discount');
+      return null;
+    }
+  };
+
+  // Update discount
+  const updateDiscount = async (discountId, discountData) => {
+    try {
+      const response = await fetch(`${apiEndpoint}/seller/discounts/${discountId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(discountData)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update discount');
+      }
+
+      // Refresh discounts list
+      await fetchDiscounts();
+
+      toast.success('Discount updated successfully');
+      return true;
+    } catch (error) {
+      console.error('Error updating discount:', error);
+      toast.error(error.message || 'Failed to update discount');
+      return false;
+    }
+  };
+
+  // Delete discount
+  const deleteDiscount = async (discountId) => {
+    try {
+      const response = await fetch(`${apiEndpoint}/seller/discounts/${discountId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete discount');
+      }
+
+      // Remove from local state
+      setDiscounts(prev => prev.filter(d => d.id !== discountId));
+
+      toast.success('Discount deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('Error deleting discount:', error);
+      toast.error('Failed to delete discount');
+      return false;
+    }
+  };
+
   return (
     <ProductContext.Provider value={{
+      // Products
       products,
       filteredProducts,
       isLoading,
@@ -202,6 +443,15 @@ export default function ProductProvider({ children }) {
       setIsLoading,
       deleteProduct,
       apiEndpoint,
+      fetchProducts,
+      fetchProduct,
+      updateProduct,
+      createProduct,
+      updateStock,
+      toggleProductActive,
+      updateProductStatus,
+
+      // Form state (legacy)
       setDate,
       date,
       selectedImages,
@@ -216,9 +466,14 @@ export default function ProductProvider({ children }) {
       name,
       setDescription,
       description,
-      updateProduct,
-      createProduct,
-      fetchProducts
+
+      // Discounts
+      discounts,
+      discountsLoading,
+      fetchDiscounts,
+      createDiscount,
+      updateDiscount,
+      deleteDiscount
     }}>
       {children}
     </ProductContext.Provider>

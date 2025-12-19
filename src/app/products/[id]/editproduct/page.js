@@ -1,19 +1,15 @@
-"use client";
-import Image from "next/image"
+"use client"
+
+import { useState, useEffect, useContext } from "react"
+import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
+import { toast, Toaster } from "react-hot-toast"
 import {
-  ChartLine,
-  Gear,
-  House,
-  MagnifyingGlass,
-  Package,
-  PlusCircle,
-  ShoppingCart,
-  SidebarSimple,
-  UsersThree,
+  CaretLeft,
+  FloppyDisk,
+  Package
 } from "phosphor-react"
 
-import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,24 +19,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -48,130 +31,233 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
-import { Textarea } from "@/components/ui/textarea"
+import SideNav from "@/app/components/SideNav"
+import { ThemeToggle } from "@/app/components/ThemeToggle"
+import PhotoCard from "@/app/components/editproduct/PhotoCard"
+import VariantHandle from "@/app/components/editproduct/VariantHandle"
+import { CategorySearch } from "@/components/ui/category-search"
 
+import withAuth from "@/hoc/WithAuth"
+import { UserContext } from "@/context/UserContext"
+import { ProductContext } from "@/context/ProductContext"
 
-import { useState, useEffect } from "react";
-import SideNav from "@/app/components/SideNav";
-import PhotoCard from "@/app/components/editproduct/PhotoCard";
-import CategoryToggle from "@/app/components/editproduct/CategoryToggle";
-import VariantHandle from "@/app/components/editproduct/VariantHandle";
-import { useContext } from "react";
-import { UserContext } from "@/context/UserContext";
-import { ProductContext } from "@/context/ProductContext";
-import { useRouter } from "next/navigation";
-import { toast, Toaster } from 'react-hot-toast';
-import AdminPfp from "@/app/components/AdminPfp";
-import withAuth from "@/hoc/WithAuth";
+function EditProduct() {
+  const router = useRouter()
+  const params = useParams()
+  const productId = params.id
 
-function Editproduct({ params }) {
-  const { apiEndpoint } = useContext(UserContext)
-  const { setName, name, setDescription, description, updateProduct } = useContext(ProductContext)
+  const { authToken, apiEndpoint } = useContext(UserContext)
+  const {
+    variants,
+    setVariants,
+    selectedImages,
+    setSelectedImages,
+    fetchProducts
+  } = useContext(ProductContext)
 
-  const router = useRouter();
-  function stripInt(obj) {
-    return parseInt(obj.editproduct, 10);
-  }
+  const [product, setProduct] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
 
-  const [product, setProduct] = useState([])
-  const [isLoading, setIsLoading] = useState(false);
-  console.log(params.id);
+  // Form state
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    price: "",
+    brand: "",
+    category: "",
+    status: "active"
+  })
 
+  // Fetch product data
   useEffect(() => {
-    setIsLoading(true);
-    fetch(`${apiEndpoint}/products/${params.id}`)
-      .then(response => response.json())
-      .then(data => {
-        setProduct(data);
+    if (!productId || !apiEndpoint) return
 
-        setIsLoading(false);
+    setIsLoading(true)
+    fetch(`${apiEndpoint}/seller/products/${productId}`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error('Product not found')
+        return response.json()
+      })
+      .then(data => {
+        setProduct(data)
+        setFormData({
+          title: data.title || data.name || "",
+          description: data.description || "",
+          price: data.price?.toString() || "",
+          brand: data.brand || "",
+          category: data.category || "",
+          status: data.status || "active"
+        })
+        // Clear any previously selected new images
+        setSelectedImages([])
       })
       .catch(error => {
-        console.error('Error:', error);
-        setIsLoading(false);
-      });
-  }, [params, apiEndpoint]);
+        console.error('Error fetching product:', error)
+        toast.error('Failed to load product')
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }, [productId, apiEndpoint, authToken, setSelectedImages])
 
-  useEffect(() => {
-    if (product.name) {
-      setName(product.name);
+  // Check if variants have prices
+  const variantsHavePrices = variants?.length > 0 && variants.every(v => v.price && parseFloat(v.price) > 0)
+  const isPriceRequired = !variants?.length || !variantsHavePrices
+
+  const handleSave = async () => {
+    // Validation
+    if (!formData.title.trim()) {
+      toast.error("Product title is required")
+      return
     }
-    if (product.description) {
-      setDescription(product.description);
+
+    if (isPriceRequired && (!formData.price || parseFloat(formData.price) <= 0)) {
+      toast.error("Valid price is required")
+      return
     }
-  }, [product, setDescription, setName]);
 
+    setIsSaving(true)
 
-  console.log(product);
+    try {
+      // Build FormData for multipart upload
+      const submitData = new FormData()
+      submitData.append('title', formData.title)
+      submitData.append('description', formData.description || '')
 
+      if (isPriceRequired || formData.price) {
+        submitData.append('price', formData.price || '0')
+      }
+
+      submitData.append('brand', formData.brand || '')
+      submitData.append('category', formData.category || '')
+
+      // Add variations as JSON string
+      if (variants?.length > 0) {
+        submitData.append('variations', JSON.stringify(variants.map(v => ({
+          id: v.id || null,
+          name: v.name,
+          value: v.value,
+          price: v.price,
+          stock: v.stock
+        }))))
+      }
+
+      // Add new images (File objects from selectedImages)
+      if (selectedImages?.length > 0) {
+        selectedImages.forEach((image) => {
+          if (image instanceof File) {
+            submitData.append('images', image)
+          }
+        })
+      }
+
+      const response = await fetch(`${apiEndpoint}/seller/products/${productId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: submitData
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update product')
+      }
+
+      toast.success("Product updated successfully!")
+
+      // Refresh products list
+      if (fetchProducts) {
+        fetchProducts()
+      }
+
+      // Navigate back to products
+      setTimeout(() => {
+        router.push('/products')
+      }, 1000)
+
+    } catch (error) {
+      console.error('Error updating product:', error)
+      toast.error(error.message || "Failed to update product")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      const response = await fetch(`${apiEndpoint}/seller/products/${productId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      if (!response.ok) throw new Error('Failed to update status')
+
+      setFormData(prev => ({ ...prev, status: newStatus }))
+      toast.success(`Status changed to ${newStatus}`)
+    } catch (error) {
+      toast.error('Failed to update status')
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen w-full flex-col bg-muted/40">
+        <SideNav />
+        <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+          <main className="flex-1 p-4 sm:px-6">
+            <div className="mx-auto max-w-4xl space-y-6">
+              <div className="h-8 w-48 animate-pulse bg-muted rounded" />
+              <div className="h-96 animate-pulse bg-muted rounded-lg" />
+            </div>
+          </main>
+        </div>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="flex min-h-screen w-full flex-col bg-muted/40">
+        <SideNav />
+        <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+          <main className="flex-1 p-4 sm:px-6">
+            <div className="mx-auto max-w-4xl text-center py-12">
+              <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Product not found</h2>
+              <Button asChild>
+                <Link href="/products">Back to Products</Link>
+              </Button>
+            </div>
+          </main>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <SideNav />
+      <Toaster />
+
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Toaster />
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="sm:hidden">
-                <SidebarSimple className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-xs">
-              <nav className="grid gap-6 text-lg font-medium">
-                <Link
-                  href="#"
-                  className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-                >
-                  <Package className="h-5 w-5 transition-all group-hover:scale-110" />
-                  <span className="sr-only">Acme Inc</span>
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <House className="h-5 w-5" />
-                  Dashboard
-                </Link>
-                <Link
-                  href="/orders"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  Orders
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-foreground"
-                >
-                  <Package className="h-5 w-5" />
-                  Products
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <UsersThree className="h-5 w-5" />
-                  Customers
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <ChartLine className="h-5 w-5" />
-                  Settings
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
+        {/* Header */}
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Breadcrumb className="hidden md:flex">
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="#">Dashboard</Link>
+                  <Link href="/dashboard">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -186,122 +272,177 @@ function Editproduct({ params }) {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <div className="relative ml-auto flex-1 md:grow-0">
-            {/* <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-            /> */}
+          <div className="ml-auto flex items-center gap-2">
+            <ThemeToggle />
           </div>
-          <AdminPfp />
         </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="icon" className="h-7 w-7">
-                <ChevronLeft className="h-4 w-4" />
-                <span className="sr-only">Back</span>
+
+        {/* Main Content */}
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 md:gap-8">
+          <div className="mx-auto w-full max-w-4xl">
+            {/* Page Title */}
+            <div className="flex items-center gap-4 mb-6">
+              <Button variant="outline" size="icon" className="h-7 w-7" asChild>
+                <Link href="/products">
+                  <CaretLeft className="h-4 w-4" />
+                  <span className="sr-only">Back</span>
+                </Link>
               </Button>
-              <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                {product.name}
+              <h1 className="flex-1 text-xl font-semibold tracking-tight">
+                {formData.title || "Edit Product"}
               </h1>
-              <Badge variant="outline" className="ml-auto sm:ml-0">
-                In stock
+              <Badge variant={formData.status === 'active' ? 'default' : 'secondary'}>
+                {formData.status}
               </Badge>
-              <div className="hidden items-center gap-2 md:ml-auto md:flex">
-                <Button variant="outline" size="sm">
-                  Discard
+              <div className="hidden items-center gap-2 md:flex">
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/products">Discard</Link>
                 </Button>
-                <Button onClick={() => updateProduct(product.id)} size="sm">Save Product</Button>
+                <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                  <FloppyDisk className="h-4 w-4 mr-1" />
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
               </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
-              <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-                <Card x-chunk="dashboard-07-chunk-0">
+
+            <div className="grid gap-6 lg:grid-cols-3">
+              {/* Left Column - Main Details */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Basic Info Card */}
+                <Card>
                   <CardHeader>
                     <CardTitle>Product Details</CardTitle>
                     <CardDescription>
-                      Lipsum dolor sit amet, consectetur adipiscing elit
+                      Basic information about your product
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-6">
-                      <div className="grid gap-3">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                          id="name"
-                          type="text"
-                          className="w-full"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                        />
-                      </div>
-                      <div className="grid gap-3">
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea
-                          id="description"
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          className="min-h-32"
-                        />
-                      </div>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Product Title *</Label>
+                      <Input
+                        id="title"
+                        placeholder="Enter product name"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        placeholder="Describe your product..."
+                        className="min-h-32"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      />
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Variants Card */}
                 <VariantHandle product={product} />
-
-                <CategoryToggle product={product} />
-
               </div>
-              <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-                <Card x-chunk="dashboard-07-chunk-3">
+
+              {/* Right Column */}
+              <div className="space-y-6">
+                {/* Status Card */}
+                <Card>
                   <CardHeader>
                     <CardTitle>Product Status</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid gap-6">
-                      <div className="grid gap-3">
-                        <Label htmlFor="status">Status</Label>
-                        {/* <Select>
-                          <SelectTrigger id="status" aria-label="Select status">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="draft">Draft</SelectItem>
-                            <SelectItem value="published">Active</SelectItem>
-                            <SelectItem value="archived">Archived</SelectItem>
-                          </SelectContent>
-                        </Select> */}
+                    <Select value={formData.status} onValueChange={handleStatusChange}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="sold_out">Sold Out</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                </Card>
+
+                {/* Pricing Card */}
+                {isPriceRequired ? (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Pricing</CardTitle>
+                      <CardDescription>Base price for your product</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <Label htmlFor="price">Base Price (KES) *</Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Enter price"
+                          value={formData.price}
+                          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {variants?.length > 0
+                            ? "Add prices to all variants to use variant pricing"
+                            : "This is the selling price"}
+                        </p>
                       </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="border-green-500/50 bg-green-500/5">
+                    <CardHeader>
+                      <CardTitle className="text-green-700 dark:text-green-400">Variant Pricing</CardTitle>
+                      <CardDescription>
+                        Using prices from variants
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                )}
+
+                {/* Category & Brand */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Organization</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Category</Label>
+                      <CategorySearch
+                        value={formData.category}
+                        onChange={(val) => setFormData({ ...formData, category: val })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="brand">Brand</Label>
+                      <Input
+                        id="brand"
+                        placeholder="Brand name"
+                        value={formData.brand}
+                        onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                      />
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* PHOTOCARD GOES HERE */}
+                {/* Images */}
                 <PhotoCard product={product} />
-
-                <Card x-chunk="dashboard-07-chunk-5">
-                  <CardHeader>
-                    <CardTitle>Archive Product</CardTitle>
-                    <CardDescription>
-                      Lipsum dolor sit amet, consectetur adipiscing elit.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div></div>
-                    <Button size="sm" variant="secondary">
-                      Archive Product
-                    </Button>
-                  </CardContent>
-                </Card>
               </div>
             </div>
-            <div className="flex items-center justify-center gap-2 md:hidden">
-              <Button variant="outline" size="sm">
-                Discard
+
+            {/* Mobile Save Button */}
+            <div className="flex items-center justify-center gap-2 md:hidden mt-6">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/products">Discard</Link>
               </Button>
-              <Button size="sm">Save Product</Button>
+              <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                <FloppyDisk className="h-4 w-4 mr-1" />
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
             </div>
           </div>
         </main>
@@ -309,4 +450,5 @@ function Editproduct({ params }) {
     </div>
   )
 }
-export default withAuth(Editproduct)
+
+export default withAuth(EditProduct)
