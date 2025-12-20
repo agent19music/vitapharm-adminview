@@ -60,6 +60,8 @@ function EditProduct() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
+  const [deletedImageIds, setDeletedImageIds] = useState([])
+
   // Form state
   const [formData, setFormData] = useState({
     title: "",
@@ -110,23 +112,24 @@ function EditProduct() {
   const variantsHavePrices = variants?.length > 0 && variants.every(v => v.price && parseFloat(v.price) > 0)
   const isPriceRequired = !variants?.length || !variantsHavePrices
 
-  const handleSave = async () => {
-    // Validation
-    if (!formData.title.trim()) {
-      toast.error("Product title is required")
-      return
-    }
+  const handleDeleteImage = (imageId) => {
+    setDeletedImageIds(prev => [...prev, imageId])
+    // Update local product state to remove the image from view
+    setProduct(prev => ({
+      ...prev,
+      images: prev.images.filter(img => img.id !== imageId)
+    }))
+  }
 
-    if (isPriceRequired && (!formData.price || parseFloat(formData.price) <= 0)) {
-      toast.error("Valid price is required")
-      return
-    }
+  const handleSave = async () => {
+    // ... validation ...
 
     setIsSaving(true)
 
     try {
       // Build FormData for multipart upload
       const submitData = new FormData()
+      // ... existing fields ...
       submitData.append('title', formData.title)
       submitData.append('description', formData.description || '')
 
@@ -146,6 +149,11 @@ function EditProduct() {
           price: v.price,
           stock: v.stock
         }))))
+      }
+
+      // Add deleted images
+      if (deletedImageIds.length > 0) {
+        submitData.append('remove_images', JSON.stringify(deletedImageIds))
       }
 
       // Add new images (File objects from selectedImages)
@@ -430,7 +438,7 @@ function EditProduct() {
                 </Card>
 
                 {/* Images */}
-                <PhotoCard product={product} />
+                <PhotoCard product={product} onDeleteImage={handleDeleteImage} />
               </div>
             </div>
 

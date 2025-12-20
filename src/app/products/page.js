@@ -1,6 +1,8 @@
 "use client"
 
 import { useContext, useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -94,33 +96,43 @@ const statusConfig = {
 }
 
 function ProductsPage() {
-  const { products, isLoading, deleteProduct, updateProductStatus } = useContext(ProductContext)
+  const { products, isLoading, deleteProduct, updateProductStatus, searchItems } = useContext(ProductContext)
   const { authToken } = useContext(UserContext)
-  const [searchQuery, setSearchQuery] = useState('')
+
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
   const [statusFilter, setStatusFilter] = useState('all')
   const [filteredProducts, setFilteredProducts] = useState([])
   const [productToDelete, setProductToDelete] = useState(null)
 
+  // Sync URL with search query
+  const handleSearchChange = (e) => {
+    const query = e.target.value
+    setSearchQuery(query)
+
+    const params = new URLSearchParams(searchParams)
+    if (query) {
+      params.set('search', query)
+    } else {
+      params.delete('search')
+    }
+    router.replace(`/products?${params.toString()}`, { scroll: false })
+  }
+
   useEffect(() => {
     if (!products) return
 
-    let filtered = [...products]
+    // 1. Apply weighted search
+    let results = searchItems(searchQuery)
 
-    // Apply search filter
-    if (searchQuery.trim() !== '') {
-      filtered = filtered.filter(p =>
-        p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
-
-    // Apply status filter
+    // 2. Apply status filter
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(p => (p.status || 'active') === statusFilter)
+      results = results.filter(p => (p.status || 'active') === statusFilter)
     }
 
-    setFilteredProducts(filtered)
+    setFilteredProducts(results)
   }, [products, searchQuery, statusFilter])
 
   const formatCurrency = (amount) => {
@@ -196,7 +208,7 @@ function ProductsPage() {
                 placeholder="Search products..."
                 className="w-[200px] pl-8"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
               />
             </div>
             <Button asChild>

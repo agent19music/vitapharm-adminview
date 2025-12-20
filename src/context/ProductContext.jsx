@@ -95,26 +95,47 @@ export default function ProductProvider({ children }) {
   }, [authToken]);
 
   // Search items
+  // Weighted search algorithm
   function searchItems(query) {
     if (!query) {
       setFilteredProducts(products);
-      return;
+      return products;
     }
 
     const lowerCaseQuery = query.toLowerCase();
-    const filtered = products.filter(product => {
-      const title = product.title?.toLowerCase() || '';
-      const desc = product.description?.toLowerCase() || '';
-      const category = product.category?.toLowerCase() || '';
-      const brand = product.brand?.toLowerCase() || '';
+    const terms = lowerCaseQuery.split(' ').filter(t => t.length > 0);
 
-      return title.includes(lowerCaseQuery) ||
-        desc.includes(lowerCaseQuery) ||
-        category.includes(lowerCaseQuery) ||
-        brand.includes(lowerCaseQuery);
+    const scoredProducts = products.map(product => {
+      let score = 0;
+      const title = product.title?.toLowerCase() || '';
+      const brand = product.brand?.toLowerCase() || '';
+      const category = product.category?.toLowerCase() || '';
+      const description = product.description?.toLowerCase() || '';
+
+      // Exact match bonus
+      if (title === lowerCaseQuery) score += 100;
+      if (brand === lowerCaseQuery) score += 80;
+
+      // Term matching
+      terms.forEach(term => {
+        if (title.includes(term)) score += 30;
+        if (title.startsWith(term)) score += 10; // Starts with bonus
+        if (brand.includes(term)) score += 20;
+        if (category.includes(term)) score += 15;
+        if (description.includes(term)) score += 5;
+      });
+
+      return { product, score };
     });
 
+    // Filter out zero scores and sort by score descending
+    const filtered = scoredProducts
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.product);
+
     setFilteredProducts(filtered);
+    return filtered;
   }
 
   // Delete product
