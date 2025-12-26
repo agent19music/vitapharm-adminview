@@ -139,6 +139,24 @@ function ProductsPage() {
     return `Ksh ${(amount || 0).toLocaleString()}`
   }
 
+  // Get display price - use base price or first variant price with variant name
+  const getDisplayPriceInfo = (product) => {
+    if (product.price != null && product.price > 0) {
+      return { price: product.price, variantName: null }
+    }
+    // Fallback to first variation price if base price is null/0
+    if (product.variations && product.variations.length > 0) {
+      const firstVariant = product.variations[0]
+      if (firstVariant?.price != null) {
+        return {
+          price: firstVariant.price,
+          variantName: firstVariant.value || firstVariant.name || 'Variant'
+        }
+      }
+    }
+    return { price: 0, variantName: null }
+  }
+
   // Get the image URL - handle both string and object formats
   const getImageUrl = (images) => {
     if (!images || images.length === 0) return null
@@ -278,7 +296,19 @@ function ProductsPage() {
                           </Link>
                         </TableCell>
                         <TableCell>
-                          <span className="font-medium">{formatCurrency(product.price)}</span>
+                          {(() => {
+                            const { price, variantName } = getDisplayPriceInfo(product)
+                            return (
+                              <div>
+                                <span className="font-medium">{formatCurrency(price)}</span>
+                                {variantName && (
+                                  <span className="block text-xs text-muted-foreground">
+                                    {variantName}
+                                  </span>
+                                )}
+                              </div>
+                            )
+                          })()}
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
